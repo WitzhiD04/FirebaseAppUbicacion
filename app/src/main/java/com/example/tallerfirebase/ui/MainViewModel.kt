@@ -11,6 +11,7 @@ import com.example.tallerfirebase.modelo.UserData
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 
 class MainViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -23,7 +24,7 @@ class MainViewModel : ViewModel() {
 
     private val db = FirebaseFirestore.getInstance()
 
-    //private val storage = FirebaseStorage.getInstance()
+    private val storage = FirebaseStorage.getInstance()
 
     init {
         verificarAuth()
@@ -70,8 +71,8 @@ class MainViewModel : ViewModel() {
             }
     }
 
-    fun registrar(nombre: String, mail: String, contrasena: String, biografia: String, fotoUri: Uri?, context: Context) {
-        if (mail.isEmpty() || contrasena.isEmpty() || nombre.isEmpty()) {
+    fun registrar(nombre: String, mail: String, contrasena: String, identificacion: String, telefono: String,  fotoUri: Uri?, context: Context) {
+        if (mail.isEmpty() || contrasena.isEmpty() || nombre.isEmpty() || identificacion.isEmpty() || telefono.isEmpty()) {
             _authState.value = AuthState.Error("Por favor, completa todos los campos")
             return
         }
@@ -84,7 +85,8 @@ class MainViewModel : ViewModel() {
                         uid = uid,
                         correo = mail,
                         nombre = nombre,
-                        biografia = biografia,
+                        identificacion = identificacion,
+                        telefono = telefono,
                         creacion = Timestamp.now()
                     )
 
@@ -92,7 +94,7 @@ class MainViewModel : ViewModel() {
                         .addOnSuccessListener {
                             _userData.value = nuevoUsuario
                             _authState.value = AuthState.autenticado
-                            //fotoUri?.let { uri -> subirFotoPerfil(uri, context) }
+                            fotoUri?.let { uri -> subirFotoPerfil(uri, context) }
                         }
                         .addOnFailureListener {
                             _authState.value = AuthState.Error("Error al guardar en base de datos")
@@ -103,7 +105,7 @@ class MainViewModel : ViewModel() {
             }
     }
 
-    /*fun subirFotoPerfil(fotoUri: Uri, context: Context) {
+    fun subirFotoPerfil(fotoUri: Uri, context: Context) {
         val ref = storage.reference
         val nomImagen = "foto_${_userData.value?.uid}"
         val espacioRef = ref.child("imagenes/perfil/${nomImagen}.jpg")
@@ -129,7 +131,7 @@ class MainViewModel : ViewModel() {
         if (uid != null) {
             db.collection("usuarios").document(uid).update("fotoUrl", fotoUrl)
         }
-    }*/
+    }
 
     fun cerrar() {
         auth.signOut()

@@ -1,18 +1,22 @@
 package com.example.tallerfirebase.ui.screens.login
 
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 
-/**
- * ViewModel para gestionar la lógica del inicio de sesión.
- */
-class LoginViewModel : ViewModel() {
-    var estado by mutableStateOf(LoginState())
-        private set
 
-    fun iniciarSesion(correo: String, contrasena: String) {
-        // TODO: Implementar lógica de Firebase
+class LoginViewModel : ViewModel() {
+    private val _state = mutableStateOf(LoginState())
+    val state: State<LoginState> = _state
+
+    fun onEmailChange(email: String) {
+        _state.value = _state.value.copy(email = email)
     }
+
+    fun onPasswordChange(password: String) {
+        _state.value = _state.value.copy(password = password)
+    }
+
 }

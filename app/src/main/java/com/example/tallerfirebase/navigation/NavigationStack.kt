@@ -5,29 +5,55 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.tallerfirebase.modelo.AuthState
+import com.example.tallerfirebase.ui.MainViewModel
 import com.example.tallerfirebase.ui.screens.profile.EditProfileScreen
+import com.example.tallerfirebase.ui.screens.profile.ProfileScreen
 import com.example.tallerfirebase.ui.screens.login.LoginScreen
 import com.example.tallerfirebase.ui.screens.map.MapScreen
 import com.example.tallerfirebase.ui.screens.login.RegisterScreen
 
-/**
- * Grafo de navegación principal de la aplicación.
- * Define todas las rutas y las transiciones animadas entre pantallas.
- *
- * @param controladorNav El controlador de navegación de Jetpack Compose.
- * @param pantallaInicial La pantalla que se muestra al iniciar la app.
- */
 @Composable
 fun NavigationStack(
     controladorNav: NavHostController,
     pantallaInicial: String = Screen.InicioSesion.ruta
 ) {
+
+    val mainViewModel: MainViewModel = viewModel()
+    val userData by mainViewModel.userData
+    var ruta by remember{mutableStateOf(pantallaInicial)}
+
+    LaunchedEffect(mainViewModel.authState.value) {
+        val auth = mainViewModel.authState.value
+        if (auth is AuthState.autenticado) {
+            ruta = Screen.Mapa.ruta
+            controladorNav.navigate(Screen.Mapa.ruta) {
+                popUpTo(0)
+            }
+        } else if (auth is AuthState.noAutenticado) {
+            ruta = Screen.InicioSesion.ruta
+            val destinoActual = controladorNav.currentDestination?.route
+            if (destinoActual != Screen.InicioSesion.ruta &&
+                destinoActual != Screen.Registro.ruta) {
+                controladorNav.navigate(Screen.InicioSesion.ruta) {
+                    popUpTo(0)
+                }
+            }
+        }
+    }
+
     NavHost(
         navController = controladorNav,
-        startDestination = pantallaInicial,
+        startDestination = ruta,
         enterTransition = {
             slideIntoContainer(
                 towards = AnimatedContentTransitionScope.SlideDirection.Left,
@@ -53,33 +79,25 @@ fun NavigationStack(
             ) + fadeOut(animationSpec = tween(350))
         }
     ) {
-        // Pantalla de Inicio de Sesión
         composable(Screen.InicioSesion.ruta) {
             LoginScreen(
-                alIniciarSesion = { correo, contrasena ->
-                    // TODO: Conectar con ViewModel para autenticación
-                    controladorNav.navigate(Screen.Mapa.ruta) {
-                        popUpTo(Screen.InicioSesion.ruta) { inclusive = true }
-                    }
-                },
+                onClickLogin = { mail, contra -> mainViewModel.login(mail, contra) },
                 alIrARegistro = {
                     controladorNav.navigate(Screen.Registro.ruta)
-                }
+                },
+                authState = mainViewModel.authState.value,
             )
         }
 
-        // Pantalla de Registro
         composable(Screen.Registro.ruta) {
             RegisterScreen(
-                alRegistrarse = { nombre, identificacion, correo, contrasena, telefono ->
-                    // TODO: Conectar con ViewModel para registro
-                    controladorNav.navigate(Screen.Mapa.ruta) {
-                        popUpTo(Screen.InicioSesion.ruta) { inclusive = true }
-                    }
+                onClickRegister = { nombre, mail, contra, identificacion, telefono, fotoUri, context  ->
+                    mainViewModel.registrar(nombre, mail, contra, identificacion, telefono, fotoUri, context)
                 },
                 alVolverAtras = {
                     controladorNav.popBackStack()
-                }
+                },
+                authState = mainViewModel.authState.value
             )
         }
 
@@ -87,7 +105,7 @@ fun NavigationStack(
         composable(Screen.Mapa.ruta) {
             MapScreen(
                 alEditarPerfil = {
-                    controladorNav.navigate(Screen.EditarPerfil.ruta)
+                    controladorNav.navigate(Screen.Perfil.ruta)
                 },
                 alCerrarSesion = {
                     // TODO: Conectar con ViewModel para cerrar sesión
@@ -101,7 +119,17 @@ fun NavigationStack(
             )
         }
 
-        // Pantalla de Editar Perfil
+        composable(Screen.Perfil.ruta) {
+            ProfileScreen(
+                alEditarPerfil = {
+                    controladorNav.navigate(Screen.EditarPerfil.ruta)
+                },
+                alVolverAtras = {
+                    controladorNav.popBackStack()
+                }
+            )
+        }
+
         composable(Screen.EditarPerfil.ruta) {
             EditProfileScreen(
                 alGuardarCambios = { nombre, identificacion, telefono, contrasena ->

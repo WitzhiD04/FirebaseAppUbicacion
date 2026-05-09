@@ -11,5 +11,6 @@ data class UserData(
     val longitud: Double = 0.0,
     val conectado: Boolean = false,
     val creacion: Timestamp,
-    val fotoPerfilUrl: String = ""
+    val fotoUrl: String = "",
+    val identificacion: String = "",
 )
