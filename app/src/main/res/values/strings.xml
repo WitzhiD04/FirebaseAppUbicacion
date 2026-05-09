@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">Taller Firebase</string>
+
+    <!-- Inicio de Sesión -->
+    <string name="titulo_inicio_sesion">Bienvenido</string>
+    <string name="hint_correo">Correo electrónico</string>
+    <string name="hint_contrasena">Contraseña</string>
+    <string name="boton_iniciar_sesion">Iniciar Sesión</string>
+    <string name="texto_ir_a_registro">¿No tienes cuenta? Regístrate aquí</string>
+
+    <!-- Registro -->
+    <string name="titulo_registro">Crear Cuenta</string>
+    <string name="hint_nombre">Nombre completo</string>
+    <string name="hint_identificacion">Número de identificación</string>
+    <string name="hint_telefono">Teléfono</string>
+    <string name="boton_registrarse">Registrarse</string>
+    <string name="texto_ir_a_login">¿Ya tienes cuenta? Inicia sesión</string>
+
+    <!-- Mapa y Principal -->
+    <string name="estado_conectado">Conectado</string>
+    <string name="estado_desconectado">Desconectado</string>
+    <string name="menu_modificar_perfil">Modificar información</string>
+    <string name="menu_cerrar_sesion">Cerrar sesión</string>
+    <string name="placeholder_mapa">Aquí se mostrará el mapa</string>
+
+    <!-- Edición de Perfil -->
+    <string name="titulo_editar_perfil">Editar Perfil</string>
+    <string name="boton_guardar">Guardar Cambios</string>
+    <string name="boton_cancelar">Cancelar</string>
+
+    <!-- Mensajes y Validaciones -->
+    <string name="error_campos_vacios">Por favor completa todos los campos</string>
+</resources>
