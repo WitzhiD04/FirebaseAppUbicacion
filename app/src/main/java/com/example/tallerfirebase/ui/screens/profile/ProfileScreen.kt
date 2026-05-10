@@ -19,7 +19,8 @@ import com.example.tallerfirebase.R
 @Composable
 fun ProfileScreen(
     alEditarPerfil: () -> Unit,
-    alVolverAtras: () -> Unit
+    alVolverAtras: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val nombreUsuario = "Juan Pérez"
     val correoUsuario = "juan.perez@example.com"
@@ -27,6 +28,7 @@ fun ProfileScreen(
     val identificacionUsuario = "123456789"
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.menu_modificar_perfil)) },
@@ -60,11 +62,16 @@ fun ProfileScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Información del Usuario
             InfoItem(etiqueta = "Nombre", valor = nombreUsuario)
             InfoItem(etiqueta = "Identificación", valor = identificacionUsuario)
             InfoItem(etiqueta = "Correo", valor = correoUsuario)
             InfoItem(etiqueta = "Teléfono", valor = telefonoUsuario)
+        }
+
+        Button(
+            onClick = alVolverAtras //Cambiar despues
+        ) {
+            Text(text = "Cerrar Sesión")
         }
     }
 }

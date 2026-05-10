@@ -28,4 +28,20 @@
     <string name="seleccionar_foto_de_perfil">Seleccionar foto de perfil</string>
 
     <string name="id_mapa">3edf23cba8f50247eb3ee63d</string>
+    <string name="se_requiere_permiso_de_ubicaci_n_para_continuar">Se requiere permiso de ubicación para continuar</string>
+    <string name="location">Ubicación</string>
+    <string name="permiso_denegado">Permiso denegado</string>
+    <string name="error_al_obtener_ubicacion">Error al obtener ubicación</string>
+    <string name="mover_el_mapa_con_la_posici_n_del_usuario">Seguir mi ubicación</string>
+    <string name="direccion">Dirección</string>
+    <string name="icono_direccion">Icono dirección</string>
+    <string name="id_mapa_claro">3edf23cba8f50247eb3ee63d</string>
+    <string name="id_mapa_oscuro">3edf23cba8f50247eb3ee63d</string>
+    <string name="polyline_color">#FF0000</string>
+    <string name="ubicaci_n_actual">Ubicación actual</string>
+    <string name="tu_ubicaci_n">Tu ubicación</string>
+    <string name="preview">Vista previa</string>
+    <string name="ubicaci_n_desconocida">Ubicación desconocida</string>
+    <string name="direccion_no_encontrada">Dirección no encontrada</string>
+    <string name="error_al_buscar_direcci_n">Error al buscar dirección</string>
 </resources>

@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,7 +36,8 @@ import com.example.tallerfirebase.ui.componentes.CampoTextoPersonalizado
 @Composable
 fun EditProfileScreen(
     alGuardarCambios: (String, String, String, String) -> Unit,
-    alVolverAtras: () -> Unit
+    alVolverAtras: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     // Estos estados deberían inicializarse con los datos del usuario real (desde el ViewModel)
     var nombre by remember { mutableStateOf("") }
@@ -46,6 +46,7 @@ fun EditProfileScreen(
     var contrasena by remember { mutableStateOf("") }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.titulo_editar_perfil)) },

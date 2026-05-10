@@ -183,4 +183,15 @@ class MainViewModel : ViewModel() {
             Toast.makeText(context, "El nombre no puede estar vacío", Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun actualizarLngLat(latitud: Double, longitud: Double, uid: String, context: Context) {
+        if (uid == _userData.value?.uid) {
+            db.collection("usuarios").document(uid).update("latitud", latitud, "longitud", longitud)
+                .addOnSuccessListener {
+                    _userData.value = _userData.value?.copy(latitud = latitud, longitud = longitud)
+                }
+        } else {
+            Toast.makeText(context, "No se pudo actualizar la ubicación", Toast.LENGTH_SHORT).show()
+        }
+    }
 }

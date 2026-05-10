@@ -22,9 +22,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
-/**
- * Campo de texto personalizado con borde para uso general.
- */
 @Composable
 fun CampoTextoPersonalizado(
     valor: String,
@@ -45,9 +42,7 @@ fun CampoTextoPersonalizado(
     )
 }
 
-/**
- * Campo de texto específico para contraseñas con opción de mostrar/ocultar.
- */
+
 @Composable
 fun CampoContrasenaPersonalizado(
     valor: String,
@@ -78,9 +73,6 @@ fun CampoContrasenaPersonalizado(
     )
 }
 
-/**
- * Botón personalizado con estilo estándar para la aplicación.
- */
 @Composable
 fun BotonPersonalizado(
     texto: String,

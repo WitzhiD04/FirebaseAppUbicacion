@@ -4,12 +4,16 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -86,6 +90,7 @@ fun NavigationStack(
                     controladorNav.navigate(Screen.Registro.ruta)
                 },
                 authState = mainViewModel.authState.value,
+                modifier = Modifier.fillMaxSize()
             )
         }
 
@@ -97,7 +102,8 @@ fun NavigationStack(
                 alVolverAtras = {
                     controladorNav.popBackStack()
                 },
-                authState = mainViewModel.authState.value
+                authState = mainViewModel.authState.value,
+                modifier = Modifier.fillMaxSize()
             )
         }
 
@@ -126,7 +132,8 @@ fun NavigationStack(
                 },
                 alVolverAtras = {
                     controladorNav.popBackStack()
-                }
+                },
+                modifier = Modifier.fillMaxSize()
             )
         }
 
@@ -138,7 +145,8 @@ fun NavigationStack(
                 },
                 alVolverAtras = {
                     controladorNav.popBackStack()
-                }
+                },
+                modifier = Modifier.fillMaxSize()
             )
         }
     }

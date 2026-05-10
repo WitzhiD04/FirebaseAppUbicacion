@@ -32,15 +32,14 @@ fun LoginScreen(
     alIrARegistro: () -> Unit,
     viewModel: LoginViewModel = viewModel(),
     authState: AuthState = AuthState.noAutenticado,
-
+    modifier: Modifier = Modifier
 ) {
 
     val state by viewModel.state
 
-    Scaffold { innerPadding ->
+    Scaffold(modifier = modifier) { innerPadding ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
                 .padding(innerPadding)
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

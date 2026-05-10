@@ -35,7 +35,8 @@ fun RegisterScreen(
     onClickRegister: (String, String, String, String, String, Uri?, android.content.Context) -> Unit = { _, _, _, _, _, _, _ -> },
     alVolverAtras: () -> Unit,
     viewModel: RegisterViewModel = viewModel(),
-    authState: AuthState = AuthState.noAutenticado
+    authState: AuthState = AuthState.noAutenticado,
+    modifier: Modifier = Modifier
 ) {
     val state by viewModel.state
     val context = LocalContext.current
@@ -46,6 +47,7 @@ fun RegisterScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.titulo_registro)) },
