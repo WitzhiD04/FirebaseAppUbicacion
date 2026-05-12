@@ -11,6 +11,7 @@ import com.example.tallerfirebase.modelo.UserData
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.storage.FirebaseStorage
 
 class MainViewModel : ViewModel() {
@@ -148,15 +149,6 @@ class MainViewModel : ViewModel() {
             }
     }
 
-    /*fun modificarBiografia(biografia: String, uid: String) {
-        if (biografia == _userData.value?.biografia) {
-            return
-        }
-        db.collection("usuarios").document(uid).update("biografia", biografia)
-            .addOnSuccessListener {
-                _userData.value = _userData.value?.copy(biografia = biografia)
-            }
-    }
 
     fun modificarImagen(uri: Uri, uid: String, context: Context) {
         val storageRef = FirebaseStorage.getInstance().reference
@@ -169,15 +161,14 @@ class MainViewModel : ViewModel() {
             .addOnFailureListener {
                 subirFotoPerfil(uri, context)
             }
-    }*/
+    }
 
-    fun modificarDatos(nombre: String, biografia: String, uid: String, uri: Uri?, context: Context) {
+    fun modificarDatos(nombre: String,  uid: String, uri: Uri?, context: Context, identificacion: String, telefono: String) {
         if (nombre.isNotEmpty()) {
             modificarNombre(nombre, uid)
-            //modificarBiografia(biografia, uid)
-            //uri?.let {
-                //modificarImagen(it, uid, context)
-            //}
+            uri?.let {
+                modificarImagen(it, uid, context)
+            }
             Toast.makeText(context, "Guardando datos...", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(context, "El nombre no puede estar vacío", Toast.LENGTH_SHORT).show()
@@ -185,13 +176,26 @@ class MainViewModel : ViewModel() {
     }
 
     fun actualizarLngLat(latitud: Double, longitud: Double, uid: String, context: Context) {
+        val geoPoint = GeoPoint(latitud, longitud)
         if (uid == _userData.value?.uid) {
-            db.collection("usuarios").document(uid).update("latitud", latitud, "longitud", longitud)
+            db.collection("usuarios").document(uid).update("ubicacion", geoPoint)
                 .addOnSuccessListener {
-                    _userData.value = _userData.value?.copy(latitud = latitud, longitud = longitud)
+                    _userData.value = _userData.value?.copy(ubicacion = geoPoint)
                 }
         } else {
             Toast.makeText(context, "No se pudo actualizar la ubicación", Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun conectado() {
+        val usuario = _userData.value ?: return
+        val nuevo = !usuario.conectado
+        
+        db.collection("usuarios").document(usuario.uid)
+            .update("conectado", nuevo)
+            .addOnSuccessListener {
+                _userData.value = usuario.copy(conectado = nuevo)
+            }
+    }
+    
 }

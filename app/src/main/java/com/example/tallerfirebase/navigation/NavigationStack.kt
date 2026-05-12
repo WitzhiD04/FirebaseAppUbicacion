@@ -107,21 +107,18 @@ fun NavigationStack(
             )
         }
 
-        // Pantalla del Mapa
         composable(Screen.Mapa.ruta) {
+            val user = userData ?: return@composable
             MapScreen(
-                alEditarPerfil = {
+                modifier = Modifier.fillMaxSize(),
+                alCerrarSesion = {
+                    mainViewModel.cerrar()
+                },
+                user = user,
+                alVerPerfil = {
                     controladorNav.navigate(Screen.Perfil.ruta)
                 },
-                alCerrarSesion = {
-                    // TODO: Conectar con ViewModel para cerrar sesión
-                    controladorNav.navigate(Screen.InicioSesion.ruta) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                },
-                alCambiarConexion = { conectado ->
-                    // TODO: Conectar con ViewModel para actualizar estado
-                }
+                mainViewModel = mainViewModel
             )
         }
 
@@ -133,20 +130,22 @@ fun NavigationStack(
                 alVolverAtras = {
                     controladorNav.popBackStack()
                 },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                user = userData ?: return@composable
             )
         }
 
         composable(Screen.EditarPerfil.ruta) {
             EditProfileScreen(
-                alGuardarCambios = { nombre, identificacion, telefono, contrasena ->
-                    // TODO: Conectar con ViewModel para actualizar datos
+                alGuardarCambios = { nombre, uid,fotoUri,context, telefono, identificacion  ->
+                    mainViewModel.modificarDatos(nombre,uid, fotoUri, context, identificacion, telefono)
                     controladorNav.popBackStack()
                 },
                 alVolverAtras = {
                     controladorNav.popBackStack()
                 },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                user = userData ?: return@composable
             )
         }
     }

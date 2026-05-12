@@ -2,10 +2,6 @@ package com.example.tallerfirebase.ui.screens.map
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.location.Location
 import android.os.Looper
 import android.util.Log
@@ -18,21 +14,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Directions
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,7 +34,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tallerfirebase.R
-import com.example.tallerfirebase.modelo.CustomMarker
+import com.example.tallerfirebase.modelo.OtroUser
+import com.example.tallerfirebase.modelo.UserData
+import com.example.tallerfirebase.ui.MainViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.isGranted
@@ -51,7 +46,6 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PinConfig
@@ -59,46 +53,39 @@ import com.google.android.gms.maps.model.RoundCap
 import com.google.maps.android.compose.AdvancedMarker
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 
-
 @Composable
-fun lightSensor(context: Context = LocalContext.current): State<Float>{
-    val sensorManager = remember {
-        context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-    }
-
-    val lightSensor = remember{
-        sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
-    }
-
-    val luminosidad = remember {
-        mutableStateOf(0f)
-    }
-
-    DisposableEffect(Unit) {
-        val listener = object: SensorEventListener {
-            override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
-
-            override fun onSensorChanged(event: SensorEvent) {
-                val lux = event.values[0]
-                luminosidad.value = lux
-            }
+fun MapTopBar(modifier: Modifier = Modifier, user: UserData, viewModel: MainViewModel) {
+    Column(
+        modifier = modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Bienvenido ${user.nombre}!",
+                style = typography.titleLarge
+            )
+            Icon(Icons.Filled.Directions, contentDescription = "Ubicación")
         }
-        sensorManager.registerListener(
-            listener,
-            lightSensor,
-            SensorManager.SENSOR_DELAY_NORMAL
-        )
-
-        onDispose {
-            sensorManager.unregisterListener(listener)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = if (user.conectado) "Conectado" else "No conectado")
+            Switch(
+                checked = user.conectado,
+                onCheckedChange = { viewModel.conectado() }
+            )
         }
     }
-    return luminosidad
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -107,20 +94,16 @@ fun lightSensor(context: Context = LocalContext.current): State<Float>{
 fun MapScreen(
     modifier: Modifier = Modifier,
     viewModel: MapViewModel = viewModel(),
-    alEditarPerfil: () -> Unit = {},
     alCerrarSesion: () -> Unit = {},
-    alCambiarConexion: (Boolean) -> Unit = {}
+    user: UserData,
+    alVerPerfil: () -> Unit = {},
+    mainViewModel: MainViewModel = viewModel()
 ){
     val state by viewModel.state.collectAsState()
     val permissionState = rememberPermissionState(
         android.Manifest.permission.ACCESS_FINE_LOCATION
     )
     val context = LocalContext.current
-    val luminosidad by lightSensor()
-
-    LaunchedEffect(luminosidad) {
-        viewModel.updateLuminosidad(luminosidad)
-    }
 
     LaunchedEffect(Unit) {
         if(!permissionState.status.isGranted){
@@ -139,13 +122,29 @@ fun MapScreen(
         }
     }
 
-    val onAddMarker = { latLng: LatLng ->
-        viewModel.onAddMarker(latLng, context)
-    }
-
     Scaffold(
-        modifier = modifier.fillMaxSize()
-    ) {innerPadding ->
+        modifier = modifier,
+        topBar = {
+            MapTopBar(
+                modifier = Modifier.fillMaxWidth(),
+                user = user,
+                viewModel = mainViewModel
+            )
+        },
+        bottomBar = {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(onClick = alVerPerfil) { 
+                    Text("Ver mi perfil")
+                }
+                Button(onClick = alCerrarSesion) {
+                    Text("Cerrar Sesión")
+                }
+            }
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -157,36 +156,27 @@ fun MapScreen(
                 }
 
                 val strLocation = stringResource(R.string.location)
-                val strPermisoDenegado = stringResource(R.string.permiso_denegado)
-                val strErrorObtenerUbicacion = stringResource(R.string.error_al_obtener_ubicacion)
 
-                LaunchedEffect(state.checkedFollowUser) {
-                    if(!state.checkedFollowUser){
-                        try{
-                            fusedLocationClient.lastLocation.addOnSuccessListener { loc ->
-                                viewModel.setFirstLocation(loc)
-                            }
-                        }catch (e: SecurityException){
-                            Log.e(strLocation, strPermisoDenegado, e)
-                        }catch (e: Exception){
-                            Log.e(strLocation, strErrorObtenerUbicacion, e)
-                        }
+                // La actualización de ubicación ahora depende del switch: user.conectado
+                DisposableEffect(user.conectado) {
+                    if(!user.conectado) {
+                        // TODO: Limpiar ruta (polyline) si el usuario se desconecta (25%)
+                        return@DisposableEffect onDispose {}
                     }
-                }
-                DisposableEffect(state.checkedFollowUser) {
-                    if(!state.checkedFollowUser) return@DisposableEffect onDispose {}
                     val locationRequest =
-                        LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 3000)
+                        LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 3000L)
                             .apply {
                                 setMinUpdateDistanceMeters(3F)
                                 setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
                                 setWaitForAccurateLocation(true)
                             }.build()
+                    
                     val locationCallback = object: LocationCallback(){
                         override fun onLocationResult(locationResult: LocationResult) {
                             val newLocation = locationResult.lastLocation
                             if(newLocation != null){
                                 viewModel.updateLocation(newLocation)
+                                // TODO: Aquí se debe actualizar la posición en Firestore en tiempo real (25%)
                             }
                         }
                     }
@@ -205,22 +195,10 @@ fun MapScreen(
                     }
                 }
 
-                Config(
-                    checkedFollowUser = state.checkedFollowUser,
-                    onCheckedChange = { viewModel.onFollowUserChanged(it) },
-                    directionText = state.directionText,
-                    onDirectionChange = { viewModel.onDirectionTextChanged(it, context) }
-                )
                 Map(
                     currentLocation = state.location,
-                    directionText = state.directionText,
-                    locationPoints = state.locationPoints,
-                    searchedAddress = state.searchedAddress,
-                    customMarkers = state.customMarkers,
-                    routePoints = state.routePoints,
-                    luminosidad = luminosidad,
-                    followUser = state.checkedFollowUser,
-                    onAddMarker = onAddMarker,
+                    userRoutePoints = state.locationPoints, 
+                    otroUsers = emptyList(), // TODO: Obtener y pasar la lista de otros usuarios conectados desde Firestore (25%)
                     modifier = Modifier.weight(1f),
                     context = context
                 )
@@ -230,183 +208,96 @@ fun MapScreen(
 }
 
 
+
 @Composable
 fun Map(
     currentLocation: Location?,
-    directionText: String,
-    locationPoints: List<LatLng>,
-    searchedAddress: LatLng?,
-    customMarkers: List<CustomMarker>,
-    routePoints: List<LatLng>,
-    luminosidad: Float,
-    followUser: Boolean,
-    onAddMarker: (LatLng) -> Unit,
+    userRoutePoints: List<LatLng>,
+    otroUsers: List<OtroUser>,
     modifier: Modifier = Modifier,
     context: Context = LocalContext.current
 ){
     val latLng = if(currentLocation != null){
         LatLng(currentLocation.latitude, currentLocation.longitude)
-    }else{//default
-        LatLng(4.628829, -74.063589)
+    }else{
+        LatLng(4.628829, -74.063589) // Default (Bogotá)
     }
+    
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(latLng, 10f)
+        position = CameraPosition.fromLatLngZoom(latLng, 15f)
     }
     val markerState = rememberMarkerState()
-    val searchedMarkerState = rememberMarkerState()
-    LaunchedEffect(currentLocation, followUser) {
+
+    LaunchedEffect(currentLocation) {
         if(currentLocation != null){
             val newLatLng = LatLng(currentLocation.latitude, currentLocation.longitude)
             markerState.position = newLatLng
-            if(followUser){
-                cameraPositionState.position =
-                    CameraPosition.
-                    fromLatLngZoom(
-                        newLatLng,
-                        15f
-                    )
-            }
+            // Centrar la cámara en la posición actual
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(newLatLng, 15f)
         }
     }
 
-    LaunchedEffect(searchedAddress) {
-        if(searchedAddress != null){
-            searchedMarkerState.position = searchedAddress
-            cameraPositionState.position = CameraPosition.fromLatLngZoom(searchedAddress,15f)
-        }
-    }
-
-    var mapaOscuro by remember { mutableStateOf(false) }
-
-    LaunchedEffect(luminosidad) {
-        if(luminosidad < 10f && !mapaOscuro){
-            mapaOscuro = true
-        }else if(luminosidad > 10f && mapaOscuro){
-            mapaOscuro = false
-        }
-    }
-
-    val mapId = if(!mapaOscuro){
-        stringResource(R.string.id_mapa_claro)
-    }
-    else{
-        stringResource(R.string.id_mapa_oscuro)
-    }
-
-    key(mapId){
-        GoogleMap(
-            modifier = modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState,
-            googleMapOptionsFactory = {
-                GoogleMapOptions().mapId(mapId)
-            },
-            uiSettings = MapUiSettings(
-                zoomControlsEnabled = true,
-                zoomGesturesEnabled = true,
-                mapToolbarEnabled = false,
-                compassEnabled = false
-            ),
-            onMapLongClick = {latLng ->
-                onAddMarker(latLng)
-            }
+    GoogleMap(
+        modifier = modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState,
+        uiSettings = MapUiSettings(
+            zoomControlsEnabled = true,
+            zoomGesturesEnabled = true,
+            mapToolbarEnabled = false,
+            compassEnabled = false
         )
-        {
-            if(locationPoints.size > 1 && followUser){
-                Polyline(
-                    points = locationPoints,
-                    clickable = true,
-                    color = Color(android.graphics.Color.parseColor(stringResource(R.string.polyline_color))),
-                    width = 12f,
-                    startCap = RoundCap(),
-                    endCap = RoundCap(),
-                    geodesic = true
-                )
-            }
+    ) {
+        // Dibujar ruta (polyline) del usuario actual (25%)
+        if(userRoutePoints.size > 1){
+            Polyline(
+                points = userRoutePoints,
+                clickable = true,
+                color = Color.Blue, 
+                width = 12f,
+                startCap = RoundCap(),
+                endCap = RoundCap(),
+                geodesic = true
+            )
+        }
 
-            if(routePoints.isNotEmpty()){
-                Polyline(
-                    points = routePoints,
-                    clickable = true,
-                    color = Color.Green,
-                    width = 15f,
-                    startCap = RoundCap(),
-                    endCap = RoundCap(),
-                    geodesic = true
-                )
-            }
-            Marker (
+        // Marcador del usuario actual.
+        // REQUERIMIENTO (20%): El diseño es libre pero no usar los default de Google Maps.
+        // Usamos AdvancedMarker con un color personalizado como base.
+        if (currentLocation != null) {
+            AdvancedMarker(
                 state = markerState,
                 title = stringResource(R.string.ubicaci_n_actual),
-                snippet = stringResource(R.string.tu_ubicaci_n)
+                snippet = "Tu posición",
+                pinConfig = PinConfig.builder()
+                    .setBackgroundColor(android.graphics.Color.BLUE) 
+                    .setBorderColor(android.graphics.Color.WHITE)
+                    .build()
             )
+        }
 
-            if(searchedAddress != null){
-                Marker(
-                    state = searchedMarkerState,
-                    title = stringResource(R.string.direccion),
-                    snippet = directionText
+        // Dibujar otros usuarios y sus rutas (25%)
+        otroUsers.forEach { otherUser ->
+            if (otherUser.routePoints.size > 1) {
+                Polyline(
+                    points = otherUser.routePoints,
+                    clickable = true,
+                    color = Color.Red, // Diferente color para diferenciar de la ruta propia
+                    width = 10f,
+                    startCap = RoundCap(),
+                    endCap = RoundCap(),
+                    geodesic = true
                 )
             }
-
-            customMarkers.forEach { customMarker ->
-                AdvancedMarker(
-                    state = rememberMarkerState(position = customMarker.position),
-                    title = customMarker.title,
-                    snippet = customMarker.snippet,
-                    pinConfig = PinConfig.builder()
-                        .setBackgroundColor(customMarker.color.toInt())
-                        .setBorderColor(android.graphics.Color.WHITE)
-                        .build()
-                )
-            }
+            
+            AdvancedMarker(
+                state = rememberMarkerState(position = otherUser.ubicacion),
+                title = otherUser.nombre,
+                pinConfig = PinConfig.builder()
+                    .setBackgroundColor(android.graphics.Color.RED)
+                    .setBorderColor(android.graphics.Color.WHITE)
+                    .build()
+            )
         }
     }
 }
 
-@Composable
-fun Config(
-    checkedFollowUser: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    directionText: String,
-    onDirectionChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-){
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                stringResource(
-                    R.string.mover_el_mapa_con_la_posici_n_del_usuario
-                ),
-                modifier = Modifier.padding(end = 8.dp)
-            )
-
-            Switch(
-                checked = checkedFollowUser,
-                onCheckedChange = onCheckedChange
-            )
-        }
-
-        OutlinedTextField(
-            value = directionText,
-            onValueChange = onDirectionChange,
-            modifier = Modifier.fillMaxWidth(),
-            label = {Text(stringResource(R.string.direccion))},
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Directions,
-                    contentDescription = stringResource(R.string.icono_direccion)
-                )
-            }
-        )
-    }
-}

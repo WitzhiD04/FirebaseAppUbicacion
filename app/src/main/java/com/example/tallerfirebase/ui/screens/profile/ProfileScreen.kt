@@ -1,6 +1,7 @@
 package com.example.tallerfirebase.ui.screens.profile
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
@@ -9,24 +10,23 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.tallerfirebase.R
+import com.example.tallerfirebase.modelo.UserData
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     alEditarPerfil: () -> Unit,
     alVolverAtras: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    user: UserData,
 ) {
-    val nombreUsuario = "Juan Pérez"
-    val correoUsuario = "juan.perez@example.com"
-    val telefonoUsuario = "3001234567"
-    val identificacionUsuario = "123456789"
-
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -52,26 +52,29 @@ fun ProfileScreen(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Icono de Perfil
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = null,
-                modifier = Modifier.size(120.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-
+            if (user.fotoUrl != "") {
+                AsyncImage(
+                    model = user.fotoUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(RoundedCornerShape(50.dp))
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(120.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
             Spacer(modifier = Modifier.height(24.dp))
 
-            InfoItem(etiqueta = "Nombre", valor = nombreUsuario)
-            InfoItem(etiqueta = "Identificación", valor = identificacionUsuario)
-            InfoItem(etiqueta = "Correo", valor = correoUsuario)
-            InfoItem(etiqueta = "Teléfono", valor = telefonoUsuario)
-        }
-
-        Button(
-            onClick = alVolverAtras //Cambiar despues
-        ) {
-            Text(text = "Cerrar Sesión")
+            InfoItem(etiqueta = "Nombre", valor = user.nombre)
+            InfoItem(etiqueta = "Identificación", valor = user.identificacion)
+            InfoItem(etiqueta = "Correo", valor = user.correo)
+            InfoItem(etiqueta = "Teléfono", valor = user.telefono)
+            InfoItem(etiqueta = "Fecha Creación", valor = user.creacion.toString())
         }
     }
 }

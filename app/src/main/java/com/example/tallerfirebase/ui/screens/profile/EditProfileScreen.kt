@@ -1,5 +1,8 @@
 package com.example.tallerfirebase.ui.screens.profile
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,15 +22,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tallerfirebase.R
+import com.example.tallerfirebase.modelo.UserData
 import com.example.tallerfirebase.ui.componentes.BotonPersonalizado
 import com.example.tallerfirebase.ui.componentes.CampoContrasenaPersonalizado
 import com.example.tallerfirebase.ui.componentes.CampoTextoPersonalizado
@@ -35,15 +38,20 @@ import com.example.tallerfirebase.ui.componentes.CampoTextoPersonalizado
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
-    alGuardarCambios: (String, String, String, String) -> Unit,
+    alGuardarCambios: (String, String, Uri?, android.content.Context, String, String) -> Unit = { _, _, _, _, _, _ -> },
     alVolverAtras: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: EditProfileViewModel = viewModel(),
+    user: UserData
 ) {
-    // Estos estados deberían inicializarse con los datos del usuario real (desde el ViewModel)
-    var nombre by remember { mutableStateOf("") }
-    var identificacion by remember { mutableStateOf("") }
-    var telefono by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
+
+    val state by viewModel.state
+    val context = LocalContext.current
+    val onePhotoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { viewModel.seleccionarFoto(it, context) }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -68,29 +76,23 @@ fun EditProfileScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             CampoTextoPersonalizado(
-                valor = nombre,
-                alCambiarValor = { nombre = it },
+                valor = state.nombre,
+                alCambiarValor = { viewModel.onNombreChange(it) },
                 etiqueta = stringResource(id = R.string.hint_nombre)
             )
 
             CampoTextoPersonalizado(
-                valor = identificacion,
-                alCambiarValor = { identificacion = it },
+                valor = state.identificacion,
+                alCambiarValor = { viewModel.onIdentificacionChange(it) },
                 etiqueta = stringResource(id = R.string.hint_identificacion),
                 tipoTeclado = KeyboardType.Number
             )
 
             CampoTextoPersonalizado(
-                valor = telefono,
-                alCambiarValor = { telefono = it },
+                valor = state.telefono,
+                alCambiarValor = { viewModel.onTelefonoChange(it) },
                 etiqueta = stringResource(id = R.string.hint_telefono),
                 tipoTeclado = KeyboardType.Phone
-            )
-
-            CampoContrasenaPersonalizado(
-                valor = contrasena,
-                alCambiarValor = { contrasena = it },
-                etiqueta = stringResource(id = R.string.hint_contrasena)
             )
 
             Row(
@@ -109,7 +111,7 @@ fun EditProfileScreen(
                 BotonPersonalizado(
                     texto = stringResource(id = R.string.boton_guardar),
                     alHacerClick = {
-                        alGuardarCambios(nombre, identificacion, telefono, contrasena)
+                        alGuardarCambios(state.nombre,user.uid, state.fotoUri, context,state.identificacion, state.telefono)
                     },
                     modifier = Modifier.weight(1f)
                 )
