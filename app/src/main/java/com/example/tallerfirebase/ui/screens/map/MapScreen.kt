@@ -37,6 +37,7 @@ import com.example.tallerfirebase.R
 import com.example.tallerfirebase.modelo.OtroUser
 import com.example.tallerfirebase.modelo.UserData
 import com.example.tallerfirebase.ui.MainViewModel
+import com.example.tallerfirebase.ui.theme.MoradoClaro
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.isGranted
@@ -133,14 +134,16 @@ fun MapScreen(
         },
         bottomBar = {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(onClick = alVerPerfil) { 
-                    Text("Ver mi perfil")
+                    Text(stringResource(R.string.ver_mi_perfil))
                 }
                 Button(onClick = alCerrarSesion) {
-                    Text("Cerrar Sesión")
+                    Text(stringResource(R.string.cerrar_sesi_n))
                 }
             }
         }
@@ -160,9 +163,10 @@ fun MapScreen(
                 // La actualización de ubicación ahora depende del switch: user.conectado
                 DisposableEffect(user.conectado) {
                     if(!user.conectado) {
-                        // TODO: Limpiar ruta (polyline) si el usuario se desconecta (25%)
+                        viewModel.desconectarse()
                         return@DisposableEffect onDispose {}
                     }
+
                     val locationRequest =
                         LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 3000L)
                             .apply {
@@ -176,7 +180,9 @@ fun MapScreen(
                             val newLocation = locationResult.lastLocation
                             if(newLocation != null){
                                 viewModel.updateLocation(newLocation)
-                                // TODO: Aquí se debe actualizar la posición en Firestore en tiempo real (25%)
+                                val lat = newLocation.latitude
+                                val lng = newLocation.longitude
+                                mainViewModel.actualizarLngLat(lat, lng, user.uid, context)
                             }
                         }
                     }
@@ -190,6 +196,8 @@ fun MapScreen(
                         Log.e(strLocation, e.toString())
                     }
 
+
+
                     onDispose {
                         fusedLocationClient.removeLocationUpdates(locationCallback)
                     }
@@ -200,7 +208,8 @@ fun MapScreen(
                     userRoutePoints = state.locationPoints, 
                     otroUsers = emptyList(), // TODO: Obtener y pasar la lista de otros usuarios conectados desde Firestore (25%)
                     modifier = Modifier.weight(1f),
-                    context = context
+                    context = context,
+                    viewModel = viewModel
                 )
             }
         }
@@ -215,14 +224,15 @@ fun Map(
     userRoutePoints: List<LatLng>,
     otroUsers: List<OtroUser>,
     modifier: Modifier = Modifier,
-    context: Context = LocalContext.current
+    context: Context = LocalContext.current,
+    viewModel: MapViewModel
 ){
     val latLng = if(currentLocation != null){
         LatLng(currentLocation.latitude, currentLocation.longitude)
     }else{
-        LatLng(4.628829, -74.063589) // Default (Bogotá)
+        LatLng(29.4383, 85.17577)
     }
-    
+
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(latLng, 15f)
     }
@@ -232,7 +242,6 @@ fun Map(
         if(currentLocation != null){
             val newLatLng = LatLng(currentLocation.latitude, currentLocation.longitude)
             markerState.position = newLatLng
-            // Centrar la cámara en la posición actual
             cameraPositionState.position = CameraPosition.fromLatLngZoom(newLatLng, 15f)
         }
     }
@@ -243,16 +252,15 @@ fun Map(
         uiSettings = MapUiSettings(
             zoomControlsEnabled = true,
             zoomGesturesEnabled = true,
-            mapToolbarEnabled = false,
-            compassEnabled = false
+            mapToolbarEnabled = true,
+            compassEnabled = true
         )
     ) {
-        // Dibujar ruta (polyline) del usuario actual (25%)
         if(userRoutePoints.size > 1){
             Polyline(
                 points = userRoutePoints,
                 clickable = true,
-                color = Color.Blue, 
+                color = MoradoClaro,
                 width = 12f,
                 startCap = RoundCap(),
                 endCap = RoundCap(),
@@ -260,28 +268,24 @@ fun Map(
             )
         }
 
-        // Marcador del usuario actual.
-        // REQUERIMIENTO (20%): El diseño es libre pero no usar los default de Google Maps.
-        // Usamos AdvancedMarker con un color personalizado como base.
         if (currentLocation != null) {
             AdvancedMarker(
                 state = markerState,
                 title = stringResource(R.string.ubicaci_n_actual),
                 snippet = "Tu posición",
                 pinConfig = PinConfig.builder()
-                    .setBackgroundColor(android.graphics.Color.BLUE) 
+                    .setBackgroundColor(android.graphics.Color.BLUE)
                     .setBorderColor(android.graphics.Color.WHITE)
                     .build()
             )
         }
 
-        // Dibujar otros usuarios y sus rutas (25%)
         otroUsers.forEach { otherUser ->
             if (otherUser.routePoints.size > 1) {
                 Polyline(
                     points = otherUser.routePoints,
                     clickable = true,
-                    color = Color.Red, // Diferente color para diferenciar de la ruta propia
+                    color = Color.Red,
                     width = 10f,
                     startCap = RoundCap(),
                     endCap = RoundCap(),

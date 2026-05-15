@@ -7,6 +7,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.tallerfirebase.modelo.AuthState
+import com.example.tallerfirebase.modelo.OtroUser
 import com.example.tallerfirebase.modelo.UserData
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -16,21 +17,15 @@ import com.google.firebase.storage.FirebaseStorage
 
 class MainViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-
     private val _authState = mutableStateOf<AuthState>(AuthState.cargando)
     val authState: State<AuthState> = _authState
-
     private val _userData = mutableStateOf<UserData?>(null)
     val userData: State<UserData?> = _userData
-
     private val db = FirebaseFirestore.getInstance()
-
     private val storage = FirebaseStorage.getInstance()
-
     init {
         verificarAuth()
     }
-
     fun verificarAuth() {
         if (auth.currentUser != null) {
             val user = auth.currentUser
@@ -163,15 +158,37 @@ class MainViewModel : ViewModel() {
             }
     }
 
+    fun modificarId(identificacion: String, uid: String) {
+        if (identificacion == _userData.value?.identificacion) {
+            return
+        }
+        db.collection("usuarios").document(uid).update("identificacion", identificacion)
+            .addOnSuccessListener {
+                _userData.value = _userData.value?.copy(identificacion = identificacion)
+            }
+    }
+
+    fun modificarTel(telefono: String, uid: String) {
+        if (telefono == _userData.value?.telefono) {
+            return
+        }
+        db.collection("usuarios").document(uid).update("telefono", telefono)
+            .addOnSuccessListener {
+                _userData.value = _userData.value?.copy(telefono = telefono)
+            }
+    }
+
     fun modificarDatos(nombre: String,  uid: String, uri: Uri?, context: Context, identificacion: String, telefono: String) {
-        if (nombre.isNotEmpty()) {
+        if (nombre.isNotEmpty() && identificacion.isNotEmpty() && telefono.isNotEmpty()) {
             modificarNombre(nombre, uid)
+            modificarId(identificacion, uid)
+            modificarTel(telefono, uid)
             uri?.let {
                 modificarImagen(it, uid, context)
             }
             Toast.makeText(context, "Guardando datos...", Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(context, "El nombre no puede estar vacío", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Existe algun dato vacio", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -197,5 +214,8 @@ class MainViewModel : ViewModel() {
                 _userData.value = usuario.copy(conectado = nuevo)
             }
     }
-    
+
+    fun otrosGeoPoint(tuUser: UserData, otrosUser: List<OtroUser>) {
+
+    }
 }

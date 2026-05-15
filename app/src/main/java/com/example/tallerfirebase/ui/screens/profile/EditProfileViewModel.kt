@@ -5,11 +5,25 @@ import android.net.Uri
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.tallerfirebase.modelo.UserData
 
 class EditProfileViewModel: ViewModel() {
 
     private val _state = mutableStateOf(EditProfileState())
     val state: State<EditProfileState> = _state
+
+    private var datosCargados = false
+
+    fun cargarDatos(userData: UserData) {
+        if (!datosCargados) {
+            _state.value = _state.value.copy(
+                nombre = userData.nombre,
+                identificacion = userData.identificacion,
+                telefono = userData.telefono
+            )
+            datosCargados = true
+        }
+    }
 
     fun onNombreChange(nombre: String) {
         _state.value = _state.value.copy(nombre = nombre)
@@ -23,8 +37,7 @@ class EditProfileViewModel: ViewModel() {
         _state.value = _state.value.copy(telefono = telefono)
     }
 
-    fun seleccionarFoto(uri: Uri, context: Context) {
-        context.contentResolver.getType(uri)
+    fun seleccionarFoto(uri: Uri) {
         _state.value = _state.value.copy(fotoUri = uri)
     }
 }

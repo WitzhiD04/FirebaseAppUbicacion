@@ -2,6 +2,7 @@ package com.example.tallerfirebase.ui.screens.map
 
 import android.location.Location
 import androidx.lifecycle.ViewModel
+import com.example.tallerfirebase.modelo.OtroUser
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +24,11 @@ class MapViewModel : ViewModel() {
         }
     }
 
-    fun setFirstLocation(location: Location?) {
-        _state.update { it.copy(location = location) }
+    fun actualizarOtrosUsuarios() {
+        
+    }
+
+    fun desconectarse() {
+        _state.update { it.copy(locationPoints = emptyList()) }
     }
 }

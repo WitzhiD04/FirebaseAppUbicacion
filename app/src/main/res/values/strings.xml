@@ -44,4 +44,6 @@
     <string name="ubicaci_n_desconocida">Ubicación desconocida</string>
     <string name="direccion_no_encontrada">Dirección no encontrada</string>
     <string name="error_al_buscar_direcci_n">Error al buscar dirección</string>
+    <string name="ver_mi_perfil">Ver mi perfil</string>
+    <string name="cerrar_sesi_n">Cerrar Sesión</string>
 </resources>
