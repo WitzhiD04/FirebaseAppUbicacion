@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material3.Button
@@ -47,13 +49,16 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PinConfig
 import com.google.android.gms.maps.model.RoundCap
 import com.google.maps.android.compose.AdvancedMarker
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
@@ -61,7 +66,9 @@ import com.google.maps.android.compose.rememberMarkerState
 @Composable
 fun MapTopBar(modifier: Modifier = Modifier, user: UserData, viewModel: MainViewModel) {
     Column(
-        modifier = modifier.padding(16.dp),
+        modifier = modifier
+            .statusBarsPadding()
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
@@ -102,20 +109,23 @@ fun MapScreen(
     otrosUsuarios: List<OtroUser> = emptyList()
 ){
     val state by viewModel.state.collectAsState()
-    val permissionState = rememberPermissionState(
-        android.Manifest.permission.ACCESS_FINE_LOCATION
+    val locationPermissionsState = com.google.accompanist.permissions.rememberMultiplePermissionsState(
+        listOf(
+            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        )
     )
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        if(!permissionState.status.isGranted){
-            permissionState.launchPermissionRequest()
+        if(!locationPermissionsState.allPermissionsGranted){
+            locationPermissionsState.launchMultiplePermissionRequest()
         }
     }
 
     val strPermisoUbicacion = stringResource(R.string.se_requiere_permiso_de_ubicaci_n_para_continuar)
-    LaunchedEffect(permissionState.status.isGranted) {
-        if(!permissionState.status.isGranted){
+    LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
+        if(!locationPermissionsState.allPermissionsGranted){
             Toast.makeText(
                 context,
                 strPermisoUbicacion,
@@ -137,6 +147,7 @@ fun MapScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .navigationBarsPadding()
                     .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
@@ -148,20 +159,20 @@ fun MapScreen(
                 }
             }
         }
+
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            if(permissionState.status.isGranted){
+            if(locationPermissionsState.allPermissionsGranted || locationPermissionsState.revokedPermissions.size < 2){
                 val fusedLocationClient = remember {
                     LocationServices.getFusedLocationProviderClient(context)
                 }
 
                 val strLocation = stringResource(R.string.location)
 
-                // La actualización de ubicación ahora depende del switch: user.conectado
                 DisposableEffect(user.conectado) {
                     if(!user.conectado) {
                         viewModel.desconectarse()
@@ -201,16 +212,16 @@ fun MapScreen(
                         fusedLocationClient.removeLocationUpdates(locationCallback)
                     }
                 }
-
-                Map(
-                    currentLocation = state.location,
-                    userRoutePoints = state.locationPoints, 
-                    otroUsers = otrosUsuarios,
-                    modifier = Modifier.weight(1f),
-                    context = context,
-                    viewModel = viewModel
-                )
             }
+
+            Map(
+                currentLocation = state.location,
+                userRoutePoints = state.locationPoints, 
+                otroUsers = otrosUsuarios,
+                modifier = Modifier.weight(1f),
+                context = context,
+                viewModel = viewModel
+            )
         }
     }
 }
@@ -248,6 +259,7 @@ fun Map(
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
+        googleMapOptionsFactory = { GoogleMapOptions().mapId("3edf23cba8f50247eb3ee63d") },
         uiSettings = MapUiSettings(
             zoomControlsEnabled = true,
             zoomGesturesEnabled = true,
@@ -255,7 +267,7 @@ fun Map(
             compassEnabled = true
         )
     ) {
-        if(userRoutePoints.size > 1){
+        if (userRoutePoints.size > 1) {
             Polyline(
                 points = userRoutePoints,
                 clickable = true,
@@ -291,7 +303,7 @@ fun Map(
                     geodesic = true
                 )
             }
-            
+
             AdvancedMarker(
                 state = rememberMarkerState(position = otherUser.ubicacion),
                 title = otherUser.nombre,

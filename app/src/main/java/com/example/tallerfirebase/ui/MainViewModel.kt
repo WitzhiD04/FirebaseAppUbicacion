@@ -49,6 +49,10 @@ class MainViewModel : ViewModel() {
                         _authState.value = AuthState.autenticado
                         otrosGeoPoint()
                     }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "Error al verificar auth", e)
+                        _authState.value = AuthState.noAutenticado
+                    }
             }
         } else {
             _authState.value = AuthState.noAutenticado
@@ -72,6 +76,10 @@ class MainViewModel : ViewModel() {
                                 _userData.value = data
                                 _authState.value = AuthState.autenticado
                                 otrosGeoPoint()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e(TAG, "Error Firestore tras login", e)
+                                _authState.value = AuthState.Error("Error al obtener datos: ${e.message}")
                             }
                     }
                 } else {
@@ -107,8 +115,9 @@ class MainViewModel : ViewModel() {
                             otrosGeoPoint()
                             fotoUri?.let { uri -> subirFotoPerfil(uri, context) }
                         }
-                        .addOnFailureListener {
-                            _authState.value = AuthState.Error("Error al guardar en base de datos")
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Error al guardar usuario en Firestore", e)
+                            _authState.value = AuthState.Error("Error al guardar: ${e.message}")
                         }
                 } else {
                     _authState.value = AuthState.Error(tarea.exception?.message ?: "Algo salio mal😧")
