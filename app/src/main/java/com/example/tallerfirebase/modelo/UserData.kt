@@ -13,5 +13,6 @@ data class UserData(
     val creacion: Timestamp,
     val fotoUrl: String = "",
     val identificacion: String = "",
-    val ultimoActualizado: Timestamp = Timestamp.now()
+    val ultimoActualizado: Timestamp = Timestamp.now(),
+    val historial: List<GeoPoint> = emptyList()
 )

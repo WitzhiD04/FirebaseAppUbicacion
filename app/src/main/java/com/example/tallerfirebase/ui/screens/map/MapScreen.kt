@@ -98,7 +98,8 @@ fun MapScreen(
     alCerrarSesion: () -> Unit = {},
     user: UserData,
     alVerPerfil: () -> Unit = {},
-    mainViewModel: MainViewModel = viewModel()
+    mainViewModel: MainViewModel = viewModel(),
+    otrosUsuarios: List<OtroUser> = emptyList()
 ){
     val state by viewModel.state.collectAsState()
     val permissionState = rememberPermissionState(
@@ -196,8 +197,6 @@ fun MapScreen(
                         Log.e(strLocation, e.toString())
                     }
 
-
-
                     onDispose {
                         fusedLocationClient.removeLocationUpdates(locationCallback)
                     }
@@ -206,7 +205,7 @@ fun MapScreen(
                 Map(
                     currentLocation = state.location,
                     userRoutePoints = state.locationPoints, 
-                    otroUsers = emptyList(), // TODO: Obtener y pasar la lista de otros usuarios conectados desde Firestore (25%)
+                    otroUsers = otrosUsuarios,
                     modifier = Modifier.weight(1f),
                     context = context,
                     viewModel = viewModel

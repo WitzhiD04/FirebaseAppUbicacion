@@ -49,7 +49,7 @@ import com.example.tallerfirebase.ui.componentes.CampoTextoPersonalizado
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
-    alGuardarCambios: (String, String, Uri?, android.content.Context, String, String) -> Unit = { _, _, _, _, _, _ -> },
+    alGuardarCambios: (String, String, Uri?, android.content.Context, String, String, String) -> Unit = { _, _, _, _, _, _, _ -> },
     alVolverAtras: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: EditProfileViewModel = viewModel(),
@@ -138,6 +138,12 @@ fun EditProfileScreen(
                 etiqueta = stringResource(id = R.string.hint_telefono),
                 tipoTeclado = KeyboardType.Phone
             )
+            CampoTextoPersonalizado(
+                valor = state.contrasena,
+                alCambiarValor = { viewModel.onContrasenaChange(it) },
+                etiqueta = stringResource(R.string.contrase_a_nueva),
+                tipoTeclado = KeyboardType.Phone
+            )
 
             Row(
                 modifier = Modifier
@@ -155,7 +161,7 @@ fun EditProfileScreen(
                 BotonPersonalizado(
                     texto = stringResource(id = R.string.boton_guardar),
                     alHacerClick = {
-                        alGuardarCambios(state.nombre,user.uid, state.fotoUri, context,state.identificacion, state.telefono)
+                        alGuardarCambios(state.nombre,user.uid, state.fotoUri, context,state.identificacion, state.telefono, state.contrasena )
                     },
                     modifier = Modifier.weight(1f)
                 )

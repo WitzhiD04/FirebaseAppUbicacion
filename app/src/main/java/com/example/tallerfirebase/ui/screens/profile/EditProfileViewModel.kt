@@ -40,4 +40,8 @@ class EditProfileViewModel: ViewModel() {
     fun seleccionarFoto(uri: Uri) {
         _state.value = _state.value.copy(fotoUri = uri)
     }
+
+    fun onContrasenaChange(contrasena: String) {
+        _state.value = _state.value.copy(contrasena = contrasena)
+    }
 }

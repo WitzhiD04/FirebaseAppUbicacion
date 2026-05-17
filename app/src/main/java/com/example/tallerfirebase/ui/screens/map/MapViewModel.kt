@@ -24,10 +24,6 @@ class MapViewModel : ViewModel() {
         }
     }
 
-    fun actualizarOtrosUsuarios() {
-        
-    }
-
     fun desconectarse() {
         _state.update { it.copy(locationPoints = emptyList()) }
     }

@@ -46,4 +46,5 @@
     <string name="error_al_buscar_direcci_n">Error al buscar dirección</string>
     <string name="ver_mi_perfil">Ver mi perfil</string>
     <string name="cerrar_sesi_n">Cerrar Sesión</string>
+    <string name="contrase_a_nueva">Contraseña nueva</string>
 </resources>
