@@ -6,5 +6,6 @@ data class EditProfileState (
     val nombre: String = "",
     val identificacion: String = "",
     val telefono: String = "",
-    val fotoUri: Uri? = null
+    val fotoUri: Uri? = null,
+    val contrasena: String = ""
 )

@@ -109,6 +109,7 @@ fun NavigationStack(
 
         composable(Screen.Mapa.ruta) {
             val user = userData ?: return@composable
+            val otros = mainViewModel.otrosUsuarios.value
             MapScreen(
                 modifier = Modifier.fillMaxSize(),
                 alCerrarSesion = {
@@ -118,7 +119,8 @@ fun NavigationStack(
                 alVerPerfil = {
                     controladorNav.navigate(Screen.Perfil.ruta)
                 },
-                mainViewModel = mainViewModel
+                mainViewModel = mainViewModel,
+                otrosUsuarios = otros
             )
         }
 

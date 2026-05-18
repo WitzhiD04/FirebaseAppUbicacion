@@ -53,3 +53,8 @@ val FondoClaroSecundario = Color(0xFFFFFFFF)
 val TextoClaroPrimario = Color(0xFF212529)
 val TextoClaroSecundario = Color(0xFF6C757D)
 val AcentoPrincipalClaro = Color(0xFF007BFF)
+
+val MoradoPrincipal = Color(0xFF6A1B9A)      // Morado intenso
+val MoradoClaro = Color(0xFF9C27B0)          // Morado vibrante
+val MoradoPastel = Color(0xFFE1BEE7)         // Morado muy suave
+

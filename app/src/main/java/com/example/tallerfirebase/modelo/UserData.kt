@@ -14,5 +14,5 @@ data class UserData(
     val fotoUrl: String = "",
     val identificacion: String = "",
     val ultimoActualizado: Timestamp = Timestamp.now(),
-    val puntosPolyline : List<GeoPoint> = emptyList()
+    val historial: List<GeoPoint> = emptyList()
 )

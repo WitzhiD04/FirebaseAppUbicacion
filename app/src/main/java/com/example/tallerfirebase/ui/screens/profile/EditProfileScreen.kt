@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -35,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -55,6 +58,10 @@ fun EditProfileScreen(
     user: UserData
 ) {
 
+    LaunchedEffect(key1 = user) {
+        viewModel.cargarDatos(user)
+    }
+
     val state by viewModel.state
     val context = LocalContext.current
 
@@ -65,7 +72,7 @@ fun EditProfileScreen(
     val onePhotoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
-        uri?.let { viewModel.seleccionarFoto(it, context) }
+        uri?.let { viewModel.seleccionarFoto(it) }
     }
 
     Scaffold(
@@ -140,6 +147,12 @@ fun EditProfileScreen(
                 valor = state.telefono,
                 alCambiarValor = { viewModel.onTelefonoChange(it) },
                 etiqueta = stringResource(id = R.string.hint_telefono),
+                tipoTeclado = KeyboardType.Phone
+            )
+            CampoTextoPersonalizado(
+                valor = state.contrasena,
+                alCambiarValor = { viewModel.onContrasenaChange(it) },
+                etiqueta = stringResource(R.string.contrase_a_nueva),
                 tipoTeclado = KeyboardType.Phone
             )
 

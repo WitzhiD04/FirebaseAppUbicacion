@@ -6,6 +6,12 @@ plugins {
     kotlin("plugin.serialization")
 }
 
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+
 android {
     namespace = "com.example.tallerfirebase"
     compileSdk {
@@ -34,8 +40,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
@@ -65,16 +71,11 @@ dependencies {
     implementation ("com.google.android.gms:play-services-maps:20.0.0")
     implementation("com.google.maps.android:maps-compose:6.4.1")
     implementation("com.google.accompanist:accompanist-permissions:0.37.3")
-
-    // Ktor
     implementation("io.ktor:ktor-client-core:2.3.0")
     implementation("io.ktor:ktor-client-okhttp:2.3.0")
     implementation("io.ktor:ktor-client-content-negotiation:2.3.0")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.0")
-
-    // Kotlin Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
-
     implementation("com.google.maps:google-maps-services:2.2.0")
     implementation("com.google.maps.android:android-maps-utils:3.8.2")
 

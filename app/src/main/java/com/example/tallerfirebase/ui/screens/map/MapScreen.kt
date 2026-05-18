@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material3.Button
@@ -37,6 +39,7 @@ import com.example.tallerfirebase.R
 import com.example.tallerfirebase.modelo.OtroUser
 import com.example.tallerfirebase.modelo.UserData
 import com.example.tallerfirebase.ui.MainViewModel
+import com.example.tallerfirebase.ui.theme.MoradoClaro
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.isGranted
@@ -46,13 +49,16 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PinConfig
 import com.google.android.gms.maps.model.RoundCap
 import com.google.maps.android.compose.AdvancedMarker
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
@@ -60,7 +66,9 @@ import com.google.maps.android.compose.rememberMarkerState
 @Composable
 fun MapTopBar(modifier: Modifier = Modifier, user: UserData, viewModel: MainViewModel) {
     Column(
-        modifier = modifier.padding(16.dp),
+        modifier = modifier
+            .statusBarsPadding()
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
@@ -97,23 +105,27 @@ fun MapScreen(
     alCerrarSesion: () -> Unit = {},
     user: UserData,
     alVerPerfil: () -> Unit = {},
-    mainViewModel: MainViewModel = viewModel()
+    mainViewModel: MainViewModel = viewModel(),
+    otrosUsuarios: List<OtroUser> = emptyList()
 ){
     val state by viewModel.state.collectAsState()
-    val permissionState = rememberPermissionState(
-        android.Manifest.permission.ACCESS_FINE_LOCATION
+    val locationPermissionsState = com.google.accompanist.permissions.rememberMultiplePermissionsState(
+        listOf(
+            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        )
     )
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        if(!permissionState.status.isGranted){
-            permissionState.launchPermissionRequest()
+        if(!locationPermissionsState.allPermissionsGranted){
+            locationPermissionsState.launchMultiplePermissionRequest()
         }
     }
 
     val strPermisoUbicacion = stringResource(R.string.se_requiere_permiso_de_ubicaci_n_para_continuar)
-    LaunchedEffect(permissionState.status.isGranted) {
-        if(!permissionState.status.isGranted){
+    LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
+        if(!locationPermissionsState.allPermissionsGranted){
             Toast.makeText(
                 context,
                 strPermisoUbicacion,
@@ -135,6 +147,7 @@ fun MapScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .navigationBarsPadding()
                     .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
@@ -146,25 +159,26 @@ fun MapScreen(
                 }
             }
         }
+
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            if(permissionState.status.isGranted){
+            if(locationPermissionsState.allPermissionsGranted || locationPermissionsState.revokedPermissions.size < 2){
                 val fusedLocationClient = remember {
                     LocationServices.getFusedLocationProviderClient(context)
                 }
 
                 val strLocation = stringResource(R.string.location)
 
-                // La actualización de ubicación ahora depende del switch: user.conectado
                 DisposableEffect(user.conectado) {
                     if(!user.conectado) {
-                        // TODO: Limpiar ruta (polyline) si el usuario se desconecta (25%)
+                        viewModel.desconectarse()
                         return@DisposableEffect onDispose {}
                     }
+
                     val locationRequest =
                         LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 3000L)
                             .apply {
@@ -178,7 +192,9 @@ fun MapScreen(
                             val newLocation = locationResult.lastLocation
                             if(newLocation != null){
                                 viewModel.updateLocation(newLocation)
-                                // TODO: Aquí se debe actualizar la posición en Firestore en tiempo real (25%)
+                                val lat = newLocation.latitude
+                                val lng = newLocation.longitude
+                                mainViewModel.actualizarLngLat(lat, lng, user.uid, context)
                             }
                         }
                     }
@@ -196,15 +212,16 @@ fun MapScreen(
                         fusedLocationClient.removeLocationUpdates(locationCallback)
                     }
                 }
-
-                Map(
-                    currentLocation = state.location,
-                    userRoutePoints = state.locationPoints, 
-                    otroUsers = emptyList(), // TODO: Obtener y pasar la lista de otros usuarios conectados desde Firestore (25%)
-                    modifier = Modifier.weight(1f),
-                    context = context
-                )
             }
+
+            Map(
+                currentLocation = state.location,
+                userRoutePoints = state.locationPoints, 
+                otroUsers = otrosUsuarios,
+                modifier = Modifier.weight(1f),
+                context = context,
+                viewModel = viewModel
+            )
         }
     }
 }
@@ -217,14 +234,15 @@ fun Map(
     userRoutePoints: List<LatLng>,
     otroUsers: List<OtroUser>,
     modifier: Modifier = Modifier,
-    context: Context = LocalContext.current
+    context: Context = LocalContext.current,
+    viewModel: MapViewModel
 ){
     val latLng = if(currentLocation != null){
         LatLng(currentLocation.latitude, currentLocation.longitude)
     }else{
-        LatLng(4.628829, -74.063589) // Default (Bogotá)
+        LatLng(29.4383, 85.17577)
     }
-    
+
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(latLng, 15f)
     }
@@ -234,7 +252,6 @@ fun Map(
         if(currentLocation != null){
             val newLatLng = LatLng(currentLocation.latitude, currentLocation.longitude)
             markerState.position = newLatLng
-            // Centrar la cámara en la posición actual
             cameraPositionState.position = CameraPosition.fromLatLngZoom(newLatLng, 15f)
         }
     }
@@ -242,19 +259,19 @@ fun Map(
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
+        googleMapOptionsFactory = { GoogleMapOptions().mapId("3edf23cba8f50247eb3ee63d") },
         uiSettings = MapUiSettings(
             zoomControlsEnabled = true,
             zoomGesturesEnabled = true,
-            mapToolbarEnabled = false,
-            compassEnabled = false
+            mapToolbarEnabled = true,
+            compassEnabled = true
         )
     ) {
-        // Dibujar ruta (polyline) del usuario actual (25%)
-        if(userRoutePoints.size > 1){
+        if (userRoutePoints.size > 1) {
             Polyline(
                 points = userRoutePoints,
                 clickable = true,
-                color = Color.Blue, 
+                color = MoradoClaro,
                 width = 12f,
                 startCap = RoundCap(),
                 endCap = RoundCap(),
@@ -262,35 +279,31 @@ fun Map(
             )
         }
 
-        // Marcador del usuario actual.
-        // REQUERIMIENTO (20%): El diseño es libre pero no usar los default de Google Maps.
-        // Usamos AdvancedMarker con un color personalizado como base.
         if (currentLocation != null) {
             AdvancedMarker(
                 state = markerState,
                 title = stringResource(R.string.ubicaci_n_actual),
                 snippet = "Tu posición",
                 pinConfig = PinConfig.builder()
-                    .setBackgroundColor(android.graphics.Color.BLUE) 
+                    .setBackgroundColor(android.graphics.Color.BLUE)
                     .setBorderColor(android.graphics.Color.WHITE)
                     .build()
             )
         }
 
-        // Dibujar otros usuarios y sus rutas (25%)
         otroUsers.forEach { otherUser ->
             if (otherUser.routePoints.size > 1) {
                 Polyline(
                     points = otherUser.routePoints,
                     clickable = true,
-                    color = Color.Red, // Diferente color para diferenciar de la ruta propia
+                    color = Color.Red,
                     width = 10f,
                     startCap = RoundCap(),
                     endCap = RoundCap(),
                     geodesic = true
                 )
             }
-            
+
             AdvancedMarker(
                 state = rememberMarkerState(position = otherUser.ubicacion),
                 title = otherUser.nombre,

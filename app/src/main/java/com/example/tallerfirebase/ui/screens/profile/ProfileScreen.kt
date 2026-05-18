@@ -74,7 +74,9 @@ fun ProfileScreen(
             InfoItem(etiqueta = "Identificación", valor = user.identificacion)
             InfoItem(etiqueta = "Correo", valor = user.correo)
             InfoItem(etiqueta = "Teléfono", valor = user.telefono)
-            InfoItem(etiqueta = "Fecha Creación Usuario", valor = user.creacion.toString())
+            val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
+            val fechaFormateada = dateFormat.format(user.creacion.toDate())
+            InfoItem(etiqueta = "Fecha Creación", valor = fechaFormateada)
         }
     }
 }

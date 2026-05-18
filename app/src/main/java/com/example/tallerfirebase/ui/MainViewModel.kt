@@ -1,31 +1,38 @@
 package com.example.tallerfirebase.ui
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.tallerfirebase.modelo.AuthState
+import com.example.tallerfirebase.modelo.OtroUser
 import com.example.tallerfirebase.modelo.UserData
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.storage.FirebaseStorage
 
 class MainViewModel : ViewModel() {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-
     private val _authState = mutableStateOf<AuthState>(AuthState.cargando)
     val authState: State<AuthState> = _authState
-
     private val _userData = mutableStateOf<UserData?>(null)
     val userData: State<UserData?> = _userData
 
-    private val db = FirebaseFirestore.getInstance()
+    private val _otrosUsuarios = mutableStateOf<List<OtroUser>>(emptyList())
+    val otrosUsuarios: State<List<OtroUser>> = _otrosUsuarios
 
+    private val db = FirebaseFirestore.getInstance()
     private val storage = FirebaseStorage.getInstance()
+    private var listenerOtros: ListenerRegistration? = null
 
     init {
         verificarAuth()
@@ -40,6 +47,11 @@ class MainViewModel : ViewModel() {
                         val data = document.toObject(UserData::class.java)
                         _userData.value = data
                         _authState.value = AuthState.autenticado
+                        otrosGeoPoint()
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "Error al verificar auth", e)
+                        _authState.value = AuthState.noAutenticado
                     }
             }
         } else {
@@ -63,6 +75,11 @@ class MainViewModel : ViewModel() {
                                 val data = document.toObject(UserData::class.java)
                                 _userData.value = data
                                 _authState.value = AuthState.autenticado
+                                otrosGeoPoint()
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e(TAG, "Error Firestore tras login", e)
+                                _authState.value = AuthState.Error("Error al obtener datos: ${e.message}")
                             }
                     }
                 } else {
@@ -95,10 +112,12 @@ class MainViewModel : ViewModel() {
                         .addOnSuccessListener {
                             _userData.value = nuevoUsuario
                             _authState.value = AuthState.autenticado
+                            otrosGeoPoint()
                             fotoUri?.let { uri -> subirFotoPerfil(uri, context) }
                         }
-                        .addOnFailureListener {
-                            _authState.value = AuthState.Error("Error al guardar en base de datos")
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Error al guardar usuario en Firestore", e)
+                            _authState.value = AuthState.Error("Error al guardar: ${e.message}")
                         }
                 } else {
                     _authState.value = AuthState.Error(tarea.exception?.message ?: "Algo salio mal😧")
@@ -137,6 +156,9 @@ class MainViewModel : ViewModel() {
     }
 
     fun cerrar() {
+        listenerOtros?.remove()
+        listenerOtros = null
+        _otrosUsuarios.value = emptyList()
         auth.signOut()
         _userData.value = null
         _authState.value = AuthState.noAutenticado
@@ -183,10 +205,18 @@ class MainViewModel : ViewModel() {
     fun actualizarLngLat(latitud: Double, longitud: Double, uid: String, context: Context) {
         val geoPoint = GeoPoint(latitud, longitud)
         if (uid == _userData.value?.uid) {
-            db.collection("usuarios").document(uid).update("ubicacion", geoPoint)
-                .addOnSuccessListener {
-                    _userData.value = _userData.value?.copy(ubicacion = geoPoint)
+            db.collection("usuarios").document(uid).update(
+                "ubicacion", geoPoint,
+                "historial", FieldValue.arrayUnion(geoPoint)
+            ).addOnSuccessListener {
+                val actual = _userData.value
+                if (actual != null) {
+                    _userData.value = actual.copy(
+                        ubicacion = geoPoint,
+                        historial = actual.historial + geoPoint
+                    )
                 }
+            }
         } else {
             Toast.makeText(context, "No se pudo actualizar la ubicación", Toast.LENGTH_SHORT).show()
         }
@@ -195,11 +225,53 @@ class MainViewModel : ViewModel() {
     fun conectado() {
         val usuario = _userData.value ?: return
         val nuevo = !usuario.conectado
-        
+
+        val updates = mutableMapOf<String, Any>(
+            "conectado" to nuevo
+        )
+        if (!nuevo) {
+            updates["historial"] = emptyList<GeoPoint>()
+        }
+
         db.collection("usuarios").document(usuario.uid)
-            .update("conectado", nuevo)
+            .update(updates)
             .addOnSuccessListener {
-                _userData.value = usuario.copy(conectado = nuevo)
+                val copy = usuario.copy(conectado = nuevo)
+                _userData.value = if (!nuevo) copy.copy(historial = emptyList()) else copy
+            }
+    }
+
+    fun otrosGeoPoint() {
+        listenerOtros?.remove()
+        val uidActual = auth.currentUser?.uid ?: return
+
+        listenerOtros = db.collection("usuarios")
+            .whereEqualTo("conectado", true)
+            .limit(100)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.w(TAG, "Fallo en la escucha constante", e)
+                    return@addSnapshotListener
+                }
+
+                val listaOtros = snapshot?.documents?.mapNotNull { doc ->
+                    val user = doc.toObject(UserData::class.java)
+                    if (user != null && user.uid != uidActual) {
+                        OtroUser(
+                            uid = user.uid,
+                            nombre = user.nombre,
+                            ubicacion = LatLng(
+                                user.ubicacion.latitude,
+                                user.ubicacion.longitude
+                            ),
+                            routePoints = user.historial.map { gp ->
+                                LatLng(gp.latitude, gp.longitude)
+                            }
+                        )
+                    } else null
+                } ?: emptyList()
+
+                _otrosUsuarios.value = listaOtros
             }
     }
 
