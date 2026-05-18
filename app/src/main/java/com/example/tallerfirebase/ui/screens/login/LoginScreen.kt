@@ -82,7 +82,8 @@ fun LoginScreen(
             } else {
                 BotonPersonalizado(
                     texto = stringResource(id = R.string.boton_iniciar_sesion),
-                    alHacerClick = { onClickLogin(state.email, state.password) }
+                    alHacerClick = { onClickLogin(state.email, state.password) },
+                    modifier = Modifier.padding(vertical = 16.dp)
                 )
             }
 

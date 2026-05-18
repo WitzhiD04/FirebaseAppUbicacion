@@ -153,18 +153,19 @@ fun EditProfileScreen(
             CampoContrasenaPersonalizado(
                 valor = state.contrasena,
                 alCambiarValor = { viewModel.onContrasenaChange(it) },
-                etiqueta = stringResource(R.string.nueva_contrase_a_opcional)
+                etiqueta = "Nueva contraseña (opcional)"
             )
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedButton(
                     onClick = alVolverAtras,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).height(48.dp)
                 ) {
                     Text(stringResource(id = R.string.boton_cancelar))
                 }
@@ -174,7 +175,7 @@ fun EditProfileScreen(
                     alHacerClick = {
                         alGuardarCambios(viewModel.updates, state.fotoUri)
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).height(48.dp)
                 )
             }
         }

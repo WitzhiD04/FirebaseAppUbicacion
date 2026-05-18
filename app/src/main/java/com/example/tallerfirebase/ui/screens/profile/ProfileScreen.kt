@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.tallerfirebase.R
 import com.example.tallerfirebase.modelo.UserData
+import com.example.tallerfirebase.ui.theme.AcentoPrincipalClaro
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -94,7 +95,7 @@ fun InfoItem(etiqueta: String, valor: String) {
         Text(
             text = etiqueta,
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.secondary
+            color = AcentoPrincipalClaro
         )
         Text(
             text = valor,

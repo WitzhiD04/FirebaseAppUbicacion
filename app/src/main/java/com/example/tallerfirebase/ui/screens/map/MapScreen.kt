@@ -39,6 +39,7 @@ import com.example.tallerfirebase.R
 import com.example.tallerfirebase.modelo.OtroUser
 import com.example.tallerfirebase.modelo.UserData
 import com.example.tallerfirebase.ui.MainViewModel
+import com.example.tallerfirebase.ui.componentes.CustomMapMarker
 import com.example.tallerfirebase.ui.theme.MoradoClaro
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
@@ -220,7 +221,8 @@ fun MapScreen(
                 otroUsers = otrosUsuarios,
                 modifier = Modifier.weight(1f),
                 context = context,
-                viewModel = viewModel
+                viewModel = viewModel,
+                userData = user
             )
         }
     }
@@ -235,7 +237,8 @@ fun Map(
     otroUsers: List<OtroUser>,
     modifier: Modifier = Modifier,
     context: Context = LocalContext.current,
-    viewModel: MapViewModel
+    viewModel: MapViewModel,
+    userData: UserData,
 ){
     val latLng = if(currentLocation != null){
         LatLng(currentLocation.latitude, currentLocation.longitude)
@@ -280,15 +283,11 @@ fun Map(
         }
 
         if (currentLocation != null) {
-            AdvancedMarker(
-                state = markerState,
-                title = stringResource(R.string.ubicaci_n_actual),
-                snippet = "Tu posición",
-                pinConfig = PinConfig.builder()
-                    .setBackgroundColor(android.graphics.Color.BLUE)
-                    .setBorderColor(android.graphics.Color.WHITE)
-                    .build()
-            )
+            CustomMapMarker(
+                imageUrl = userData.fotoUrl,
+                fullName = "Tu ubicación",
+                location = markerState.position
+            ) { }
         }
 
         otroUsers.forEach { otherUser ->
@@ -304,14 +303,12 @@ fun Map(
                 )
             }
 
-            AdvancedMarker(
-                state = rememberMarkerState(position = otherUser.ubicacion),
-                title = otherUser.nombre,
-                pinConfig = PinConfig.builder()
-                    .setBackgroundColor(android.graphics.Color.RED)
-                    .setBorderColor(android.graphics.Color.WHITE)
-                    .build()
-            )
+            CustomMapMarker(
+                imageUrl = otherUser.fotoUri,
+                fullName = otherUser.nombre,
+                location = otherUser.ubicacion,
+            ) { }
+
         }
     }
 }

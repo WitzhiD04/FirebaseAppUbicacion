@@ -6,5 +6,6 @@ data class OtroUser(
     val uid: String,
     val nombre: String,
     val ubicacion: LatLng,
-    val routePoints: List<LatLng> = emptyList()
+    val routePoints: List<LatLng> = emptyList(),
+    val fotoUri: String = ""
 )

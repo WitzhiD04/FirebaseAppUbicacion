@@ -162,6 +162,7 @@ fun RegisterScreen(
                             context
                         )
                     },
+                    modifier = Modifier.padding(vertical = 16.dp),
                     habilitado = state.nombre.isNotBlank() && state.email.isNotBlank() && 
                                  state.password.isNotBlank() && state.identificacion.isNotBlank() && 
                                  state.telefono.isNotBlank()
