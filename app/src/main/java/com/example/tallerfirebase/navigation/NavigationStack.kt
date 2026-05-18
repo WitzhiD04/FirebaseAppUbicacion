@@ -137,8 +137,13 @@ fun NavigationStack(
 
         composable(Screen.EditarPerfil.ruta) {
             EditProfileScreen(
-                alGuardarCambios = { nombre, uid,fotoUri,context, telefono, identificacion  ->
-                    mainViewModel.modificarDatos(nombre,uid, fotoUri, context, identificacion, telefono)
+                alGuardarCambios = { updates, nuevaFotoUri  ->
+                    mainViewModel.modificarDatos(
+                        updates,
+                        userData?.uid ?: return@EditProfileScreen,
+                        context = controladorNav.context,
+                        fotoUri = nuevaFotoUri
+                    )
                     controladorNav.popBackStack()
                 },
                 alVolverAtras = {

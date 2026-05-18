@@ -10,8 +10,9 @@ data class UserData(
     val telefono: String = "",
     val ubicacion: GeoPoint = GeoPoint(0.0, 0.0),
     val conectado: Boolean = false,
-    val creacion: Timestamp,
+    val creacion: Timestamp = Timestamp.now(),
     val fotoUrl: String = "",
     val identificacion: String = "",
-    val ultimoActualizado: Timestamp = Timestamp.now()
+    val ultimoActualizado: Timestamp = Timestamp.now(),
+    val puntosPolyline : List<GeoPoint> = emptyList()
 )

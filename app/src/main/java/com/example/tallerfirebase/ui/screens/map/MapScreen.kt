@@ -69,7 +69,7 @@ fun MapTopBar(modifier: Modifier = Modifier, user: UserData, viewModel: MainView
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Bienvenido ${user.nombre}!",
+                text = stringResource(R.string.bienvenido, user.nombre),
                 style = typography.titleLarge
             )
             Icon(Icons.Filled.Directions, contentDescription = "Ubicación")
@@ -79,7 +79,7 @@ fun MapTopBar(modifier: Modifier = Modifier, user: UserData, viewModel: MainView
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = if (user.conectado) "Conectado" else "No conectado")
+            Text(text = if (user.conectado) stringResource(R.string.conectado) else stringResource(R.string.no_conectado))
             Switch(
                 checked = user.conectado,
                 onCheckedChange = { viewModel.conectado() }
@@ -133,14 +133,16 @@ fun MapScreen(
         },
         bottomBar = {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(onClick = alVerPerfil) { 
-                    Text("Ver mi perfil")
+                    Text(stringResource(R.string.ver_mi_perfil))
                 }
                 Button(onClick = alCerrarSesion) {
-                    Text("Cerrar Sesión")
+                    Text(stringResource(R.string.cerrar_sesi_n))
                 }
             }
         }

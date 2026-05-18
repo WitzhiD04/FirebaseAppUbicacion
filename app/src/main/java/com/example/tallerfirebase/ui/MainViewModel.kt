@@ -107,9 +107,11 @@ class MainViewModel : ViewModel() {
     }
 
     fun subirFotoPerfil(fotoUri: Uri, context: Context) {
+        val uid = auth.currentUser?.uid ?: return
         val ref = storage.reference
-        val nomImagen = "foto_${_userData.value?.uid}"
+        val nomImagen = "foto_$uid"
         val espacioRef = ref.child("imagenes/perfil/${nomImagen}.jpg")
+        Toast.makeText(context, "Subiendo foto...", Toast.LENGTH_SHORT).show()
 
         val byteArray = context.contentResolver.openInputStream(fotoUri)?.use {it.readBytes()}
 
@@ -139,39 +141,42 @@ class MainViewModel : ViewModel() {
         _userData.value = null
         _authState.value = AuthState.noAutenticado
     }
-    fun modificarNombre(nombre: String, uid: String) {
-        if (nombre == _userData.value?.nombre) {
-            return
-        }
-        db.collection("usuarios").document(uid).update("nombre", nombre)
-            .addOnSuccessListener {
-                _userData.value = _userData.value?.copy(nombre = nombre)
-            }
-    }
 
-
-    fun modificarImagen(uri: Uri, uid: String, context: Context) {
-        val storageRef = FirebaseStorage.getInstance().reference
-        val fotoRef = storageRef.child("imagenes/perfil/foto_${uid}.jpg")
-
-        fotoRef.delete()
-            .addOnSuccessListener {
-                subirFotoPerfil(uri, context)
+    fun modificarDatos(
+        updates: Map<String, Any>,
+        uid: String,
+        context: Context,
+        fotoUri: Uri? = null
+    ){
+        try{
+            if(updates.isNotEmpty()){
+                db.collection("usuarios")
+                    .document(uid)
+                    .update(updates)
+                    .addOnSuccessListener {
+                        val actual = _userData.value
+                        if(actual != null){
+                            _userData.value = actual.copy(
+                                nombre = updates["nombre"] as? String ?: actual.nombre,
+                                telefono = updates["telefono"] as? String ?: actual.telefono,
+                                identificacion = updates["identificacion"] as? String ?: actual.identificacion
+                            )
+                        }
+                        Toast.makeText(context, "Datos actualizados", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(
+                            context,
+                            "Datos no han podido ser actualizados",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
             }
-            .addOnFailureListener {
-                subirFotoPerfil(uri, context)
+            fotoUri?.let {
+                subirFotoPerfil(it, context)
             }
-    }
-
-    fun modificarDatos(nombre: String,  uid: String, uri: Uri?, context: Context, identificacion: String, telefono: String) {
-        if (nombre.isNotEmpty()) {
-            modificarNombre(nombre, uid)
-            uri?.let {
-                modificarImagen(it, uid, context)
-            }
-            Toast.makeText(context, "Guardando datos...", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(context, "El nombre no puede estar vacío", Toast.LENGTH_SHORT).show()
+        }catch (e: Exception){
+            println("Error updating user profile: $e")
         }
     }
 
@@ -197,5 +202,5 @@ class MainViewModel : ViewModel() {
                 _userData.value = usuario.copy(conectado = nuevo)
             }
     }
-    
+
 }

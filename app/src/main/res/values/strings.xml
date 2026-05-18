@@ -16,7 +16,7 @@
 
     <string name="estado_conectado">Conectado</string>
     <string name="estado_desconectado">Desconectado</string>
-    <string name="menu_modificar_perfil">Modificar información</string>
+    <string name="menu_modificar_perfil">Mi perfíl</string>
     <string name="menu_cerrar_sesion">Cerrar sesión</string>
     <string name="placeholder_mapa">Aquí se mostrará el mapa</string>
 
@@ -44,4 +44,10 @@
     <string name="ubicaci_n_desconocida">Ubicación desconocida</string>
     <string name="direccion_no_encontrada">Dirección no encontrada</string>
     <string name="error_al_buscar_direcci_n">Error al buscar dirección</string>
+    <string name="ingresa_tus_datos">Ingresa tus datos</string>
+    <string name="bienvenido">Bienvenido %1$s!</string>
+    <string name="conectado">Conectado</string>
+    <string name="no_conectado">No conectado</string>
+    <string name="ver_mi_perfil">Ver mi perfil</string>
+    <string name="cerrar_sesi_n">Cerrar Sesión</string>
 </resources>

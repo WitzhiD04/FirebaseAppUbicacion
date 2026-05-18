@@ -74,7 +74,7 @@ fun ProfileScreen(
             InfoItem(etiqueta = "Identificación", valor = user.identificacion)
             InfoItem(etiqueta = "Correo", valor = user.correo)
             InfoItem(etiqueta = "Teléfono", valor = user.telefono)
-            InfoItem(etiqueta = "Fecha Creación", valor = user.creacion.toString())
+            InfoItem(etiqueta = "Fecha Creación Usuario", valor = user.creacion.toString())
         }
     }
 }
