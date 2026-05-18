@@ -46,6 +46,7 @@ import coil.compose.AsyncImage
 import com.example.tallerfirebase.R
 import com.example.tallerfirebase.modelo.UserData
 import com.example.tallerfirebase.ui.componentes.BotonPersonalizado
+import com.example.tallerfirebase.ui.componentes.CampoContrasenaPersonalizado
 import com.example.tallerfirebase.ui.componentes.CampoTextoPersonalizado
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -149,11 +150,10 @@ fun EditProfileScreen(
                 etiqueta = stringResource(id = R.string.hint_telefono),
                 tipoTeclado = KeyboardType.Phone
             )
-            CampoTextoPersonalizado(
+            CampoContrasenaPersonalizado(
                 valor = state.contrasena,
                 alCambiarValor = { viewModel.onContrasenaChange(it) },
-                etiqueta = stringResource(R.string.contrase_a_nueva),
-                tipoTeclado = KeyboardType.Phone
+                etiqueta = stringResource(R.string.nueva_contrase_a_opcional)
             )
 
             Row(

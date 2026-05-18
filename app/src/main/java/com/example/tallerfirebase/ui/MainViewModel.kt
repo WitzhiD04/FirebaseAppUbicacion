@@ -193,6 +193,17 @@ class MainViewModel : ViewModel() {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
+
+                val nuevaContrasena = updates["contrasena"] as? String
+                if(!nuevaContrasena.isNullOrBlank()){
+                    auth.currentUser?.updatePassword(nuevaContrasena)
+                        ?.addOnSuccessListener {
+                            Toast.makeText(context, "Contraseña actualizada", Toast.LENGTH_SHORT).show()
+                        }
+                        ?.addOnFailureListener {
+                            Toast.makeText(context, "Contraseña no actualizada", Toast.LENGTH_SHORT).show()
+                        }
+                }
             }
             fotoUri?.let {
                 subirFotoPerfil(it, context)
@@ -200,6 +211,7 @@ class MainViewModel : ViewModel() {
         }catch (e: Exception){
             println("Error updating user profile: $e")
         }
+
     }
 
     fun actualizarLngLat(latitud: Double, longitud: Double, uid: String, context: Context) {

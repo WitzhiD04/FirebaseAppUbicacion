@@ -55,5 +55,8 @@ class EditProfileViewModel: ViewModel() {
 
     fun onContrasenaChange(contrasena: String) {
         _state.value = _state.value.copy(contrasena = contrasena)
+        if(contrasena.isNotEmpty()){
+            updates["contrasena"] = contrasena
+        }
     }
 }
