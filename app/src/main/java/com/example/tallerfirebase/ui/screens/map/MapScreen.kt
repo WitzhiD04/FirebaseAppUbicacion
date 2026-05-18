@@ -77,7 +77,7 @@ fun MapTopBar(modifier: Modifier = Modifier, user: UserData, viewModel: MainView
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Bienvenido ${user.nombre}!",
+                text = stringResource(R.string.bienvenido, user.nombre),
                 style = typography.titleLarge
             )
             Icon(Icons.Filled.Directions, contentDescription = "Ubicación")
@@ -87,7 +87,7 @@ fun MapTopBar(modifier: Modifier = Modifier, user: UserData, viewModel: MainView
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = if (user.conectado) "Conectado" else "No conectado")
+            Text(text = if (user.conectado) stringResource(R.string.conectado) else stringResource(R.string.no_conectado))
             Switch(
                 checked = user.conectado,
                 onCheckedChange = { viewModel.conectado() }

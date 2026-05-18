@@ -69,7 +69,7 @@ fun RegisterScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Ingresa tus datos",
+                text = stringResource(R.string.ingresa_tus_datos),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.align(Alignment.Start)
