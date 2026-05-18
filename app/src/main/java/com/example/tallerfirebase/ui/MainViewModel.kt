@@ -172,27 +172,32 @@ class MainViewModel : ViewModel() {
     ){
         try{
             if(updates.isNotEmpty()){
-                db.collection("usuarios")
-                    .document(uid)
-                    .update(updates)
-                    .addOnSuccessListener {
-                        val actual = _userData.value
-                        if(actual != null){
-                            _userData.value = actual.copy(
-                                nombre = updates["nombre"] as? String ?: actual.nombre,
-                                telefono = updates["telefono"] as? String ?: actual.telefono,
-                                identificacion = updates["identificacion"] as? String ?: actual.identificacion
-                            )
+                val firestoreUpdates = updates.toMutableMap()
+                firestoreUpdates.remove("contrasena") // Evitar guardar contraseña en texto plano en Firestore
+
+                if (firestoreUpdates.isNotEmpty()) {
+                    db.collection("usuarios")
+                        .document(uid)
+                        .update(firestoreUpdates)
+                        .addOnSuccessListener {
+                            val actual = _userData.value
+                            if(actual != null){
+                                _userData.value = actual.copy(
+                                    nombre = updates["nombre"] as? String ?: actual.nombre,
+                                    telefono = updates["telefono"] as? String ?: actual.telefono,
+                                    identificacion = updates["identificacion"] as? String ?: actual.identificacion
+                                )
+                            }
+                            Toast.makeText(context, "Datos actualizados", Toast.LENGTH_SHORT).show()
                         }
-                        Toast.makeText(context, "Datos actualizados", Toast.LENGTH_SHORT).show()
-                    }
-                    .addOnFailureListener {
-                        Toast.makeText(
-                            context,
-                            "Datos no han podido ser actualizados",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                        .addOnFailureListener {
+                            Toast.makeText(
+                                context,
+                                "Datos no han podido ser actualizados",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                }
 
                 val nuevaContrasena = updates["contrasena"] as? String
                 if(!nuevaContrasena.isNullOrBlank()){

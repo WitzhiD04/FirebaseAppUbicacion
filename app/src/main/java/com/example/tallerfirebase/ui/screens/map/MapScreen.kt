@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material3.Button
@@ -28,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,6 +55,7 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.PinConfig
 import com.google.android.gms.maps.model.RoundCap
 import com.google.maps.android.compose.AdvancedMarker
@@ -251,6 +254,13 @@ fun Map(
     }
     val markerState = rememberMarkerState()
 
+    val isDarkTheme = isSystemInDarkTheme()
+    val mapProperties = if (isDarkTheme) {
+        MapProperties(mapStyleOptions = MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style_dark))
+    } else {
+        MapProperties()
+    }
+
     LaunchedEffect(currentLocation) {
         if(currentLocation != null){
             val newLatLng = LatLng(currentLocation.latitude, currentLocation.longitude)
@@ -259,17 +269,25 @@ fun Map(
         }
     }
 
-    GoogleMap(
-        modifier = modifier.fillMaxSize(),
-        cameraPositionState = cameraPositionState,
-        googleMapOptionsFactory = { GoogleMapOptions().mapId("3edf23cba8f50247eb3ee63d") },
-        uiSettings = MapUiSettings(
-            zoomControlsEnabled = true,
-            zoomGesturesEnabled = true,
-            mapToolbarEnabled = true,
-            compassEnabled = true
-        )
-    ) {
+    key(isDarkTheme) {
+        GoogleMap(
+            modifier = modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState,
+            properties = mapProperties,
+            googleMapOptionsFactory = {
+                if (isDarkTheme) {
+                    GoogleMapOptions()
+                } else {
+                    GoogleMapOptions().mapId("3edf23cba8f50247eb3ee63d")
+                }
+            },
+            uiSettings = MapUiSettings(
+                zoomControlsEnabled = true,
+                zoomGesturesEnabled = true,
+                mapToolbarEnabled = true,
+                compassEnabled = true
+            )
+        ) {
         if (userRoutePoints.size > 1) {
             Polyline(
                 points = userRoutePoints,
@@ -309,6 +327,7 @@ fun Map(
                 location = otherUser.ubicacion,
             ) { }
 
+        }
         }
     }
 }

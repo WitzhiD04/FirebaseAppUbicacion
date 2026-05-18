@@ -51,4 +51,6 @@
     <string name="ver_mi_perfil">Ver mi perfil</string>
     <string name="cerrar_sesi_n">Cerrar Sesión</string>
     <string name="contrase_a_nueva">Contraseña nueva</string>
+    <string name="tomar_foto_de_perfil">Tomar foto de perfil</string>
+    <string name="borrar_foto_de_perfil">Borrar foto de perfil</string>
 </resources>
