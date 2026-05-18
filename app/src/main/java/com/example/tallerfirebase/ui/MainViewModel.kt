@@ -173,7 +173,7 @@ class MainViewModel : ViewModel() {
         try{
             if(updates.isNotEmpty()){
                 val firestoreUpdates = updates.toMutableMap()
-                firestoreUpdates.remove("contrasena") // Evitar guardar contraseña en texto plano en Firestore
+                firestoreUpdates.remove("contrasena")
 
                 if (firestoreUpdates.isNotEmpty()) {
                     db.collection("usuarios")
