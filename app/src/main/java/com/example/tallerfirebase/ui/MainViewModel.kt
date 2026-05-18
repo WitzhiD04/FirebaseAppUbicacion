@@ -278,7 +278,8 @@ class MainViewModel : ViewModel() {
                             ),
                             routePoints = user.historial.map { gp ->
                                 LatLng(gp.latitude, gp.longitude)
-                            }
+                            },
+                            fotoUri = user.fotoUrl
                         )
                     } else null
                 } ?: emptyList()

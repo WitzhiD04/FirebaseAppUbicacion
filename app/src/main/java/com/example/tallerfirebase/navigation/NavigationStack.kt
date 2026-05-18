@@ -108,14 +108,15 @@ fun NavigationStack(
         }
 
         composable(Screen.Mapa.ruta) {
-            val user = userData ?: return@composable
-            val otros = mainViewModel.otrosUsuarios.value
+            val user by mainViewModel.userData
+            val otros by mainViewModel.otrosUsuarios
+            if (user == null) return@composable
             MapScreen(
                 modifier = Modifier.fillMaxSize(),
                 alCerrarSesion = {
                     mainViewModel.cerrar()
                 },
-                user = user,
+                user = user!!,
                 alVerPerfil = {
                     controladorNav.navigate(Screen.Perfil.ruta)
                 },

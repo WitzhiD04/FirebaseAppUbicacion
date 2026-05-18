@@ -58,3 +58,6 @@ val MoradoPrincipal = Color(0xFF6A1B9A)      // Morado intenso
 val MoradoClaro = Color(0xFF9C27B0)          // Morado vibrante
 val MoradoPastel = Color(0xFFE1BEE7)         // Morado muy suave
 
+
+//color fondo marcadores
+val FondoMarcadores = Color(0xFF8534B7)
