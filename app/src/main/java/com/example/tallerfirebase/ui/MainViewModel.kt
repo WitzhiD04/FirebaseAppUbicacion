@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.example.tallerfirebase.R
 import com.example.tallerfirebase.modelo.AuthState
 import com.example.tallerfirebase.modelo.OtroUser
 import com.example.tallerfirebase.modelo.UserData
@@ -130,7 +131,7 @@ class MainViewModel : ViewModel() {
         val ref = storage.reference
         val nomImagen = "foto_$uid"
         val espacioRef = ref.child("imagenes/perfil/${nomImagen}.jpg")
-        Toast.makeText(context, "Subiendo foto...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.subiendo_foto), Toast.LENGTH_SHORT).show()
 
         val byteArray = context.contentResolver.openInputStream(fotoUri)?.use {it.readBytes()}
 
@@ -138,9 +139,11 @@ class MainViewModel : ViewModel() {
             espacioRef.putBytes(bytes).addOnSuccessListener {
                 it.storage.downloadUrl.addOnSuccessListener { uri ->
                     guardarFoto(uri.toString())
-                    Toast.makeText(context, "Foto actualizada", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context,
+                        context.getString(R.string.foto_actualizada), Toast.LENGTH_SHORT).show()
                 }.addOnFailureListener {
-                    Toast.makeText(context, "Falló la subida", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context,
+                        context.getString(R.string.fall_la_subida), Toast.LENGTH_SHORT).show()
                     _userData.value = _userData.value?.copy(fotoUrl = "")
                 }
             }
@@ -193,7 +196,7 @@ class MainViewModel : ViewModel() {
                         .addOnFailureListener {
                             Toast.makeText(
                                 context,
-                                "Datos no han podido ser actualizados",
+                                context.getString(R.string.datos_no_han_podido_ser_actualizados),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -203,10 +206,12 @@ class MainViewModel : ViewModel() {
                 if(!nuevaContrasena.isNullOrBlank()){
                     auth.currentUser?.updatePassword(nuevaContrasena)
                         ?.addOnSuccessListener {
-                            Toast.makeText(context, "Contraseña actualizada", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context,
+                                context.getString(R.string.contrase_a_actualizada), Toast.LENGTH_SHORT).show()
                         }
                         ?.addOnFailureListener {
-                            Toast.makeText(context, "Contraseña no actualizada", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context,
+                                context.getString(R.string.contrase_a_no_actualizada), Toast.LENGTH_SHORT).show()
                         }
                 }
             }
@@ -235,7 +240,8 @@ class MainViewModel : ViewModel() {
                 }
             }
         } else {
-            Toast.makeText(context, "No se pudo actualizar la ubicación", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context,
+                context.getString(R.string.no_se_pudo_actualizar_la_ubicaci_n), Toast.LENGTH_SHORT).show()
         }
     }
 

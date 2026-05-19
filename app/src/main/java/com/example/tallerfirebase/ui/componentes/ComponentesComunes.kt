@@ -32,12 +32,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.example.tallerfirebase.R
 import com.example.tallerfirebase.ui.theme.AcentoPrincipalClaro
 import com.example.tallerfirebase.ui.theme.FondoMarcadores
 import com.example.tallerfirebase.ui.theme.TextoPrimario
@@ -84,7 +86,9 @@ fun CampoContrasenaPersonalizado(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
         trailingIcon = {
             val imagen = if (mostrarContrasena) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-            val descripcion = if (mostrarContrasena) "Ocultar contraseña" else "Mostrar contraseña"
+            val descripcion = if (mostrarContrasena) stringResource(R.string.ocultar_contrase_a) else stringResource(
+                R.string.mostrar_contrase_a
+            )
 
             IconButton(onClick = { mostrarContrasena = !mostrarContrasena }) {
                 Icon(imageVector = imagen, contentDescription = descripcion)
@@ -159,7 +163,9 @@ fun CustomMapMarker(
                     Image(
                         painter = painter,
                         contentDescription = "Profile Image",
-                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp)),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(16.dp)),
                         contentScale = ContentScale.Crop
                     )
                 }else{
@@ -169,7 +175,10 @@ fun CustomMapMarker(
                         Image(
                             painter = painter,
                             contentDescription = "Profile Image",
-                            modifier = Modifier.fillMaxSize().weight(1f).clip(RoundedCornerShape(16.dp)),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .weight(1f)
+                                .clip(RoundedCornerShape(16.dp)),
                             contentScale = ContentScale.Crop
                         )
                         Text(
