@@ -303,7 +303,7 @@ fun Map(
         if (currentLocation != null) {
             CustomMapMarker(
                 imageUrl = userData.fotoUrl,
-                fullName = "Tu ubicación",
+                fullName = stringResource(R.string.tu_ubicaci_n2),
                 location = markerState.position
             ) { }
         }

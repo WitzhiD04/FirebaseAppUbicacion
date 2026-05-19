@@ -74,13 +74,13 @@ fun ProfileScreen(
             }
             Spacer(modifier = Modifier.height(24.dp))
 
-            InfoItem(etiqueta = "Nombre", valor = user.nombre)
-            InfoItem(etiqueta = "Identificación", valor = user.identificacion)
-            InfoItem(etiqueta = "Correo", valor = user.correo)
-            InfoItem(etiqueta = "Teléfono", valor = user.telefono)
+            InfoItem(etiqueta = stringResource(R.string.nombre), valor = user.nombre)
+            InfoItem(etiqueta = stringResource(R.string.identificaci_n), valor = user.identificacion)
+            InfoItem(etiqueta = stringResource(R.string.correo), valor = user.correo)
+            InfoItem(etiqueta = stringResource(R.string.tel_fono), valor = user.telefono)
             val dateFormat = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
             val fechaFormateada = dateFormat.format(user.creacion.toDate())
-            InfoItem(etiqueta = "Fecha Creación", valor = fechaFormateada)
+            InfoItem(etiqueta = stringResource(R.string.fecha_creaci_n), valor = fechaFormateada)
         }
     }
 }

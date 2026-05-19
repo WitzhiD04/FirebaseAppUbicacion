@@ -53,4 +53,20 @@
     <string name="contrase_a_nueva">Contraseña nueva</string>
     <string name="tomar_foto_de_perfil">Tomar foto de perfil</string>
     <string name="borrar_foto_de_perfil">Borrar foto de perfil</string>
+    <string name="tu_ubicaci_n2">Tu ubicación</string>
+    <string name="nueva_contrase_a_opcional">Nueva contraseña (opcional)</string>
+    <string name="nombre">Nombre</string>
+    <string name="identificaci_n">Identificación</string>
+    <string name="correo">Correo</string>
+    <string name="tel_fono">Teléfono</string>
+    <string name="fecha_creaci_n">Fecha Creación</string>
+    <string name="ocultar_contrase_a">Ocultar contraseña</string>
+    <string name="mostrar_contrase_a">Mostrar contraseña</string>
+    <string name="subiendo_foto">Subiendo foto...</string>
+    <string name="foto_actualizada">Foto actualizada</string>
+    <string name="fall_la_subida">Falló la subida</string>
+    <string name="datos_no_han_podido_ser_actualizados">Datos no han podido ser actualizados</string>
+    <string name="contrase_a_no_actualizada">Contraseña no actualizada</string>
+    <string name="contrase_a_actualizada">Contraseña actualizada</string>
+    <string name="no_se_pudo_actualizar_la_ubicaci_n">No se pudo actualizar la ubicación</string>
 </resources>
